@@ -1,0 +1,131 @@
+# Aura — a connection-first mathematical canvas
+
+Aura treats mathematics as a **space of connectable objects**, not as text. Every number,
+variable, operator, relation, function, integral and set is a typed vertex on an infinite
+pan-and-zoom canvas, and every connection is a port binding governed by a type lattice.
+LaTeX, MathML and JSON are *serialisations* of that graph — never the source of truth.
+
+Android client, Jetpack Compose, fully offline. 338-symbol library, symbolic solving,
+2D/3D plotting, stylus ink recognition and an executable kernel specification suite.
+
+**Status:** in closed testing on Google Play.
+
+---
+
+## What you can do
+
+| Flow | Where |
+|---|---|
+| Pan, zoom and drag typed vertices; ghost paths preview legal bindings | canvas |
+| Draw with a stylus or type LaTeX and decompose it into a hypergraph | **Write** |
+| Inspect ports, types and diagnostics for a cluster | right drawer → `inspect` |
+| Fold constants, simplify symbolically, solve for a variable, step by step | right drawer → `solve` |
+| Plot `y = f(x)` and rotate `z = f(x, y)` surfaces with parameter sliders | right drawer → `plot` |
+| Discover connections across the canvas and verify them numerically | right drawer → `connect` |
+| Run the kernel specification suite and read its report | right drawer → `verify` |
+| Browse 338 symbols across 16 mathematical domains | **Symbols** |
+| Export LaTeX / MathML / JSON | **Export** |
+
+Everything is persisted on device (Room + SQLite). Every mutation stores before/after graph
+snapshots inside one transaction, so undo and redo are exact rather than approximate.
+
+---
+
+## Architecture
+
+```
+app/src/main/java/com/example/
+├── aura/kernel/          pure Kotlin, no Android imports — the whole mathematical core
+│   ├── Ontology.kt       type lattice, port declarations, admissibility, symbol geometry
+│   ├── SymbolLibrary.kt  338 symbol blueprints across 16 domains
+│   ├── Engine.kt         indexing, type inference, diagnostics, LaTeX rendering,
+│   │                     expression layout, connection candidates, collapse/expand
+│   ├── LatexParser.kt    LaTeX → typed hypergraph (fractions, powers, radicals, limits,
+│   │                     big operators, enclosures, matrices, function application)
+│   ├── Evaluate.kt       numeric evaluation, constant folding, 2D/3D sampling, scopes
+│   ├── SymbolicEngine.kt rewrite rules, step-by-step solver, proof traces
+│   ├── Discover.kt       canvas-wide connection discovery and verification
+│   ├── InkRecognizer.kt  geometric multi-stroke classifier (Tier‑1 ink)
+│   ├── Seeds.kt          the five seeded canvases
+│   └── KernelTests.kt    60 executable specifications
+├── aura/data/            Room entities, DAO, repository, snapshot transactions
+├── aura/ui/              Compose workspace, canvas stage, panels, dialogs
+└── ui/theme/             obsidian/amber design language, bundled fonts
+```
+
+The kernel is deliberately free of Android dependencies: it compiles and runs on a plain
+JVM, which is what makes the specification suite usable as a build gate.
+
+---
+
+## Build and test
+
+Requirements: JDK 21, Android SDK with platform 36.
+
+```bash
+# Android Studio: open the project and run the `app` configuration.
+
+# Command line (the repository does not vendor a gradle-wrapper.jar — see note below):
+gradle testDebugUnitTest     # runs the 60 kernel specifications
+gradle assembleDebug         # builds an installable APK
+gradle bundleRelease         # builds the Play Store AAB
+```
+
+> **Note on the Gradle wrapper.** `gradle/wrapper/gradle-wrapper.properties` pins Gradle
+> 9.3.1, but `gradle/wrapper/gradle-wrapper.jar` is not checked in. Use Android Studio, a
+> local Gradle 9.3.1 install, or `gradle wrapper` once to generate the jar. CI uses
+> `gradle/actions/setup-gradle` with the same version.
+
+Release signing reads `KEYSTORE_PATH`, `STORE_PASSWORD` and `KEY_PASSWORD` from the
+environment (falling back to `my-upload-key.jks` in the repository root). Never commit a
+keystore: `.gitignore` excludes `*.jks` and `*.keystore`.
+
+### The kernel specification suite
+
+`KernelTests.kt` holds 60 executable specifications. They are available in two places:
+
+* **in the app** — open the right drawer → `verify` → *run suite*;
+* **in CI and on the command line** — `./gradlew testDebugUnitTest`, via
+  `app/src/test/java/com/example/ExampleUnitTest.kt`.
+
+The suite changed real behaviour; it is not decorative. It currently pins, among others:
+
+* unbraced exponents bind a single atom (`a^2 + b^2 = c^2` is the Pythagorean theorem, not
+  `a^(2 + b^(2 = c^2))`);
+* braced exponents still accept full relations (`x^{2n+1}`);
+* integrals read their limits and drop the differential (`\int_0^1 x^2 \, dx` has integrand
+  `x²`, not `x²·d·x`);
+* summation index relations (`\sum_{n=1}^{10} n`) are admissible limits and evaluate to 55;
+* `|x - 3|` is an enclosure vertex that evaluates;
+* every solve step preserves the truth of the equation on sample values;
+* pathological input is rejected with a `ParseError` instead of overflowing the stack.
+
+---
+
+## Design language
+
+Obsidian canvas (`#060910`) with amber, teal, rose and violet accents; Playfair Display for
+mathematics, JetBrains Mono for telemetry, Plus Jakarta Sans for UI. Panels are translucent
+glass with hairline borders; ghost candidates animate as marching dashed beziers.
+
+---
+
+## Known limitations
+
+* Canvas, ink and rendering are tuned for phones and tablets; very dense canvases (thousands
+  of vertices) are not a supported target.
+* Expression input is capped at 2 048 tokens and 192 levels of nesting; deeper input is
+  rejected with an explanatory error rather than risking the UI thread.
+* The solver covers linear isolation, fractions, products, roots/even-root branches and
+  constants. General polynomial factoring and systems of equations are not implemented.
+* Discovery verification is numeric sampling (12 deterministic rounds), not a theorem prover;
+  recognised laws that sampling cannot decide are labelled *unverifiable* instead of guessed.
+* No cloud sync, accounts or telemetry. Everything stays on the device.
+
+---
+
+## Licence and provenance
+
+Built as a native port of the Aura web prototype (see
+`public/assets/aistudio/aura-mathematical-graph-editor__2__e12efca7.zip`). The typed
+hypergraph model, palette and interaction language are shared between the two.

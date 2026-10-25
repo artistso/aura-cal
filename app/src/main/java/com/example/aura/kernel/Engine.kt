@@ -197,9 +197,24 @@ object Engine {
         }
 
         var prec = 6
+        // Variants handled by the specialised block below are rendered there only. Rendering their
+        // operands here as well doubled the work per nesting level (2^depth for nested |...|).
+        val genericSkipsOperator = node.kind == NodeKind.Operator && (
+            node.variant in Ontology.POSTFIX_VARIANTS ||
+                node.variant in Ontology.PREFIX_VARIANTS ||
+                node.variant in Ontology.ENCLOSURE_VARIANTS ||
+                node.variant == "binom" || node.variant == "pm" || node.variant == "mp"
+            )
+        val genericSkipsContainer = node.kind == NodeKind.Container && (
+            node.variant in Ontology.ENCLOSURE_VARIANTS ||
+                node.variant in Ontology.ACCENT_VARIANTS ||
+                node.variant in Ontology.MATRIX_VARIANTS ||
+                node.variant in Ontology.BIG_VARIANTS ||
+                node.variant == "root"
+            )
         var tex = when (node.kind) {
             NodeKind.Operator -> {
-                when (node.variant) {
+                if (genericSkipsOperator) "" else when (node.variant) {
                     "power" -> {
                         prec = 5
                         "{${slot(PortId.Base, 6)}}^{${slot(PortId.Exponent, 6)}}"
@@ -231,7 +246,7 @@ object Engine {
                 else "$name\\left(\\square\\right)"
             }
             NodeKind.Container -> {
-                when (node.variant) {
+                if (genericSkipsContainer) "" else when (node.variant) {
                     "sqrt" -> "\\sqrt{${slot(PortId.Body)}}"
                     "int", "sum" -> {
                         prec = 2
@@ -266,6 +281,11 @@ object Engine {
                 else -> "${wrapped}!"
             }
             prec = 6
+        } else if (node.kind == NodeKind.Operator && (variant == "pm" || variant == "mp") &&
+            (childOf(index, nodeId, PortId.Left) != null || childOf(index, nodeId, PortId.Right) != null)
+        ) {
+            tex = "${slot(PortId.Left, 2)} ${node.token} ${slot(PortId.Right, 3)}"
+            prec = 2
         } else if (node.kind == NodeKind.Operator && variant in Ontology.PREFIX_VARIANTS) {
             val arg = childOf(index, nodeId, PortId.Arg)
             val inner = if (arg != null) renderLatex(arg.id, index, next, 6) else "\\square"
@@ -394,8 +414,24 @@ object Engine {
                 val arg = childType(index, node.id, PortId.Arg, cache)
                 if (arg != null) MathType.Expression else MathType.Function
             }
-            NodeKind.Container -> MathType.Expression
+            NodeKind.Container -> {
+                // |x| and ⌊x⌋ are scalar-valued when their operand is.
+                if (node.variant in Ontology.ENCLOSURE_VARIANTS) {
+                    when (childType(index, node.id, PortId.Body, cache)) {
+                        MathType.Scalar, MathType.Variable -> MathType.Scalar
+                        else -> MathType.Expression
+                    }
+                } else {
+                    MathType.Expression
+                }
+            }
             NodeKind.Operator -> {
+                if (node.variant in Ontology.ENCLOSURE_VARIANTS) {
+                    return when (childType(index, node.id, PortId.Arg, cache)) {
+                        MathType.Scalar, MathType.Variable -> MathType.Scalar
+                        else -> MathType.Expression
+                    }
+                }
                 if (node.variant == "power") {
                     val base = childType(index, node.id, PortId.Base, cache)
                     val exp = childType(index, node.id, PortId.Exponent, cache)
@@ -509,7 +545,8 @@ object Engine {
                         )
                     )
                 }
-                if (cType == MathType.Relation) {
+                val isIndexBound = portId == PortId.Lower || portId == PortId.Upper
+                if (cType == MathType.Relation && !isIndexBound) {
                     out.add(
                         Diagnostic(
                             nodeId = node.id,

@@ -187,7 +187,7 @@ object Ontology {
         "fact", "transpose", "inverse", "conj", "prime", "doubleprime", "degree", "complement"
     )
 
-    val PREFIX_VARIANTS = setOf("neg", "forall", "exists", "nabla", "partial")
+    val PREFIX_VARIANTS = setOf("neg", "forall", "exists", "nabla", "partial", "pm")
 
     val ACCENT_VARIANTS = setOf(
         "hat", "bar", "vec", "dot", "ddot", "tilde", "overline", "underline", "check", "widehat", "widetilde"
@@ -203,6 +203,12 @@ object Ontology {
     val MATRIX_VARIANTS = setOf("matrix", "bmatrix", "vmatrix", "cases")
     val ENCLOSURE_VARIANTS = setOf("abs", "norm", "floor", "ceil")
     val SHAREABLE_KINDS = setOf(NodeKind.Literal, NodeKind.Variable, NodeKind.Set)
+
+    /**
+     * Limits and indices: a plain bound (`_{0}`), a variable (`_{n}`) or an index relation
+     * with its start value (`_{n=1}`, the conventional summation notation).
+     */
+    val BOUND_TYPES = listOf(MathType.Scalar, MathType.Variable, MathType.Relation)
 
     const val TILE_HEIGHT = 52f
     const val TILE_MIN = 46f
@@ -319,8 +325,8 @@ fun portsFor(node: AuraNode): List<PortDef> {
                     PortDef(PortId.Body, "Radicand", Ontology.OPERAND_TYPES, true, "Expression under the radical", PortSide.Right)
                 )
                 v != null && v in Ontology.BIG_VARIANTS -> listOf(
-                    PortDef(PortId.Lower, "Lower limit", listOf(MathType.Scalar, MathType.Variable), false, "Lower bound", PortSide.BottomRight),
-                    PortDef(PortId.Upper, "Upper limit", listOf(MathType.Scalar, MathType.Variable), false, "Upper bound", PortSide.TopRight),
+                    PortDef(PortId.Lower, "Lower limit", Ontology.BOUND_TYPES, false, "Lower bound", PortSide.BottomRight),
+                    PortDef(PortId.Upper, "Upper limit", Ontology.BOUND_TYPES, false, "Upper bound", PortSide.TopRight),
                     PortDef(PortId.Body, "Body", Ontology.OPERAND_TYPES, true, "Integrand / summand", PortSide.Right)
                 )
                 else -> listOf(
