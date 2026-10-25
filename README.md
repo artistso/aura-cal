@@ -8,7 +8,7 @@ LaTeX, MathML and JSON are *serialisations* of that graph — never the source o
 Android client, Jetpack Compose, fully offline. 338-symbol library, symbolic solving,
 2D/3D plotting, stylus ink recognition and an executable kernel specification suite.
 
-**Status:** in closed testing on Google Play (2.1).
+**Status:** in closed testing on Google Play (3.0).
 [![CI](https://github.com/artistso/aura-cal/actions/workflows/android.yml/badge.svg)](https://github.com/artistso/aura-cal/actions/workflows/android.yml)
 
 Aura also defines a document format — **Aura Graph Format (AGF, draft 0.1)** — so the mathematics

@@ -2,7 +2,7 @@
 
 All notable changes to the Android client. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] — format
+## [3.0] — 2026-10-25
 
 ### Added
 
@@ -62,6 +62,14 @@ All notable changes to the Android client. Format follows [Keep a Changelog](htt
 
 * The reference evaluator now returns *undefined* for `±` (`SPEC` §6). It previously returned the
   operand, which silently turned a two-valued result into one.
+
+### Release engineering
+
+* `versionCode` 2 → **3**, `versionName` 2.1 → **3.0** — the repository had not been bumped to
+  match the track, so the next upload would have been rejected by Play. Current-version
+  references in README, RELEASE and `docs/CITATION.cff` are synchronised; the AGF format
+  (0.1), the Python package (0.1.0), the JSON export format version and the Room schema
+  version are independent version lines and deliberately unchanged.
 
 ## [2.1] — 2026-10-25
 
