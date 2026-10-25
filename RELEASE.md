@@ -1,7 +1,7 @@
 # Release runbook — Aura (Android)
 
 Practical checklist for shipping a build to **closed testing** and, once the track is clean,
-to production. Written for version 2.1 (`versionCode = 2`).
+to production. Written for version 3.0 (`versionCode = 3`).
 
 ---
 
@@ -9,8 +9,8 @@ to production. Written for version 2.1 (`versionCode = 2`).
 
 | Check | Where | Current value |
 |---|---|---|
-| `versionCode` increased | `app/build.gradle.kts` | `2` |
-| `versionName` updated | `app/build.gradle.kts` | `2.1` |
+| `versionCode` increased | `app/build.gradle.kts` | `3` |
+| `versionName` updated | `app/build.gradle.kts` | `3.0` |
 | Kernel specs green | `gradle testDebugUnitTest` | 60/60 |
 | `applicationId` unchanged | `app/build.gradle.kts` | `com.aistudio.auramath.hypxqv` |
 | `targetSdk` meets Play policy | `app/build.gradle.kts` | `36` |
@@ -22,7 +22,7 @@ app and strands your closed testers.
 **Never change the signing key.** The upload key lives in `my-upload-key.jks` (or `KEYSTORE_PATH`);
 losing it means a key-reset request to Play support.
 
-> If Play Console already reports a `versionCode` of 2 or higher for this app (for example
+> If Play Console already reports a `versionCode` of 3 or higher for this app (for example
 > because an earlier AI Studio build was uploaded from a different checkout), bump the number
 > in `app/build.gradle.kts` before building. Play rejects any upload whose `versionCode` is not
 > strictly greater than every build already on the track.
