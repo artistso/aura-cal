@@ -9,7 +9,7 @@ description = "Aura Graph Format — read, write, validate and evaluate typed ma
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }
-authors = [{ name = "steven owens", email = "290508482+artistso@users.noreply.github.com" }]
+authors = [{ name = "steven owens", email = "adventuresindrawing@gmail.com" }]
 keywords = ["mathematics", "hypergraph", "data-format", "computer-algebra", "sympy"]
 classifiers = [
   "Development Status :: 4 - Beta",
