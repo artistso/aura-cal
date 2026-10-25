@@ -118,7 +118,21 @@ gradle bundleRelease         # builds the Play Store AAB
 
 Release signing reads `KEYSTORE_PATH`, `STORE_PASSWORD` and `KEY_PASSWORD` from the
 environment (falling back to `my-upload-key.jks` in the repository root). Never commit a
-keystore: `.gitignore` excludes `*.jks` and `*.keystore`.
+release keystore: `.gitignore` excludes `*.jks` and `*.keystore`.
+
+A **debug** build needs `debug.keystore` in the repository root, because
+`app/build.gradle.kts` points the debug signing config at it. AI Studio creates that file for
+you; a fresh clone does not have it, and the build fails with
+`Keystore file '…/debug.keystore' not found for signing config 'debugConfig'`. Generate one:
+
+```bash
+keytool -genkeypair -v -keystore debug.keystore -storepass android -keypass android \
+  -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+  -dname "CN=Android Debug,O=Android,C=US"
+```
+
+CI does exactly this, with a throwaway key. The debug key is not the upload key and never
+touches the Play Store.
 
 ### The kernel specification suite
 
@@ -126,7 +140,11 @@ keystore: `.gitignore` excludes `*.jks` and `*.keystore`.
 
 * **in the app** — open the right drawer → `verify` → *run suite*;
 * **in CI and on the command line** — `./gradlew testDebugUnitTest`, via
-  `app/src/test/java/com/example/ExampleUnitTest.kt`.
+  `app/src/test/java/com/example/ExampleUnitTest.kt`;
+* **without the Android SDK at all** — `tools/RunKernelSpecs.kt`, which is how CI runs the
+  gate: `kotlinc app/src/main/java/com/example/aura/kernel/*.kt tools/RunKernelSpecs.kt
+  -include-runtime -d build/kernel-specs.jar` then `java -cp build/kernel-specs.jar
+  kernel.specs.KernelSpecs`.
 
 The suite changed real behaviour; it is not decorative. It currently pins, among others:
 

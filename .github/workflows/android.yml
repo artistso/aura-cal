@@ -83,6 +83,21 @@ jobs:
           echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
 
+      # app/build.gradle.kts points the debug signing config at ${rootDir}/debug.keystore, and
+      # .gitignore re-includes that filename but the file itself was never committed. Locally the
+      # file exists (AI Studio creates it), which is why this only ever failed in CI -- and it
+      # failed there on every run. Generate a throwaway debug key rather than commit a private key.
+      - name: Provide a debug keystore
+        run: |
+          set -euo pipefail
+          if [ ! -f debug.keystore ]; then
+            keytool -genkeypair -v -keystore debug.keystore \
+              -storepass android -keypass android -alias androiddebugkey \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          ls -l debug.keystore
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
