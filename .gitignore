@@ -27,3 +27,12 @@ keystore.properties
 /app/build
 /build
 .cxx/
+
+# Python (agf package)
+__pycache__/
+*.py[cod]
+python/.venv/
+python/build/
+python/dist/
+*.egg-info/
+.pytest_cache/

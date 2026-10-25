@@ -31,8 +31,10 @@ information that reorders everything else.
 
 ### G2 — A second implementation (the standard gate)
 
-* **Pass:** a Python package (`agf`) that reads/writes AGF 0.1, passes conformance classes C1–C4
-  against `docs/conformance/`, and is published on PyPI. Written independently of the Kotlin code.
+* **Status:** the Python package exists (`python/`), is written independently of the Kotlin code,
+  and passes C1–C5 plus the LaTeX projection (172/172 checks). **Not yet published to PyPI, and
+  written by the same author** — so the gate is 80% closed, not closed.
+* **Pass:** published on PyPI, and reviewed by at least one person who did not write it.
 * **Kill signal:** the spec turns out to be under-specified for someone writing it fresh. That is
   the single most useful thing that can happen before the format hardens — it is why this gate
   exists before any outreach.
@@ -41,8 +43,11 @@ information that reorders everything else.
 
 ### G3 — Interop with the tools researchers already use
 
-* **Pass:** `agf → SymPy` and `agf ↔ OpenMath/MathML` round-trips on a corpus of ~100 real
-  expressions (from textbooks, papers, problem sets), with a published failure list.
+* **Status:** `agf → SymPy` and `from_sympy → agf` round-trips work and are tested
+  (`python/tests/test_sympy.py`), including solving `2x + 3 = 11` through the bridge. OpenMath
+  and MathML are not done, and the corpus is 30 expressions rather than ~100 real ones.
+* **Pass:** `agf ↔ OpenMath/MathML` round-trips on a corpus of ~100 real expressions (from
+  textbooks, papers, problem sets), with a published failure list.
 * **Kill signal:** the typed-port model turns out to be inexpressible in OpenMath without loss.
   Then the pitch is narrower: AGF is for *authoring*, not interchange.
 
@@ -81,9 +86,9 @@ information that reorders everything else.
 
 ## Next (2.2 — pick one, not three)
 
-Recommended: **G2, the Python reader/writer plus an AGF corpus**, because it is the cheapest way
-to learn whether the format is real, and it doubles as the bridge that makes Aura usable next to
-a CAS.
+**G2 landed in this repository** (`python/`, independent of the Kotlin kernel, passing C1–C5).
+The remaining G2 work is unglamorous and decisive: publish it, get one outside reviewer, and
+grow the corpus from 30 synthetic cases to ~100 real expressions.
 
 Alternatives, if tester feedback says otherwise:
 

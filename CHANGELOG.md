@@ -2,6 +2,27 @@
 
 All notable changes to the Android client. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — format
+
+### Added
+
+* **`python/` — an independent implementation of AGF 0.1.** Reader/writer (with unknown-member
+  preservation), the full vocabulary and port table, type inference, well-formedness rules
+  W1–W7 plus W8, the reference evaluator (`undefined` ≠ `NaN`), the LaTeX projection, a SymPy
+  bridge (`to_sympy` / `from_sympy`) and a CLI (`agf validate|show|eval|latex|sympy|conformance`).
+  55 tests, including 172 conformance checks against the Kotlin corpus.
+* **`docs/conformance/`** — 30 generated cases (graph, types, value, LaTeX), 5 rewrite traces for
+  the C5 soundness class, and 8 hand-authored malformed documents, one per well-formedness rule.
+  Regenerate with `tools/GenerateConformance.kt`.
+* `docs/SPEC.md` §9 now reports conformance per class for both implementations, and states the
+  caveat plainly: agreement between two implementations by one author catches ambiguity, not
+  shared conceptual error.
+
+### Changed
+
+* The reference evaluator now returns *undefined* for `±` (`SPEC` §6). It previously returned the
+  operand, which silently turned a two-valued result into one.
+
 ## [2.1] — 2026-10-25
 
 Correctness and stability release for closed testing. The headline is a parser rewrite: several

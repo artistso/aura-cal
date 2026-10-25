@@ -475,12 +475,20 @@ object SymbolicEngine {
         val left = Engine.childOf(index, root.id, PortId.Left) ?: return null
         val right = Engine.childOf(index, root.id, PortId.Right) ?: return null
         if (left.kind != NodeKind.Variable || left.token != targetVar) return null
-        val value = Evaluate.evalExpression(index, right.id) ?: return null
-        if (!value.isFinite()) return null
-        val signAmbiguous = Engine.subtreeIds(index, right.id).any { id ->
-            val variant = index.byId[id]?.variant
-            variant == "pm" || variant == "mp"
+
+        // `±` is not a value (it denotes a set of values), so an even-root solution cannot be
+        // evaluated as a whole. Evaluate the *operand* and render both branches.
+        val signNode = if (right.variant == "pm" || right.variant == "mp") right else null
+        val signOperand = if (signNode != null) {
+            Engine.childOf(index, signNode.id, PortId.Arg)
+        } else null
+        val value = if (signNode != null) {
+            signOperand?.let { Evaluate.evalExpression(index, it.id) } ?: return null
+        } else {
+            Evaluate.evalExpression(index, right.id) ?: return null
         }
+        if (!value.isFinite()) return null
+        val signAmbiguous = signNode != null
         val rendered = Evaluate.formatNumber(if (signAmbiguous) abs(value) else value)
         val target = if (signAmbiguous) "$targetVar = \\pm $rendered" else "$targetVar = $rendered"
         val beforeTex = Engine.toLatex(graph, root.id, index)

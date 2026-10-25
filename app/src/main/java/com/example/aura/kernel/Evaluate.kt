@@ -281,6 +281,8 @@ object Evaluate {
                         }
                     }
                     v != null && v in Ontology.PREFIX_VARIANTS -> {
+                        // `\pm` denotes a set of values, not a value: it is undefined, not its operand.
+                        if (v == "pm" || v == "mp") return null
                         val arg = child(PortId.Arg) ?: return null
                         if (v == "neg") -arg else arg
                     }

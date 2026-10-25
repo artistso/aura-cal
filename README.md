@@ -20,7 +20,20 @@ it produces is not trapped in this app:
 * [`docs/ROADMAP.md`](docs/ROADMAP.md) — gates toward adoption, each with a kill condition.
 * [`docs/CITATION.cff`](docs/CITATION.cff) — how to cite the software or the format.
 
-AGF is a **draft with a single implementation**. Treat it as a proposal, not a standard.
+AGF is a **draft**, and it now has two implementations that agree: the Kotlin kernel and an
+independent Python package ([`python/`](python/)), which passes all five conformance classes plus
+the LaTeX projection (172 checks). Treat it as a proposal, not yet a standard.
+
+```bash
+cd python && pip install -e ".[sympy,test]" && python -m pytest   # 55 tests
+python -m agf.cli conformance                                     # 172/172
+```
+
+```python
+from agf import load, validate, evaluate
+doc = load("canvas.agf.json")
+print([str(d) for d in validate(doc)], evaluate(doc, doc.roots()[0].id))
+```
 
 ---
 
