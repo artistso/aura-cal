@@ -7,7 +7,8 @@ All notable changes to the Android client. Format follows [Keep a Changelog](htt
 ### Added
 
 * **Named authorship and a PyPI publish pipeline.** steven owens is now the named author on
-  the technical report, `docs/CITATION.cff`, the SPEC and the `aura-agf` package metadata.
+  the technical report, `docs/CITATION.cff`, the SPEC and the `aura-agf` package metadata
+  (contact: adventuresindrawing@gmail.com).
   `.github/workflows/publish-pypi.yml` publishes via PyPI Trusted Publishing (OIDC, no stored
   token): it re-runs the tests and conformance suite, refuses to build when the release tag,
   `pyproject.toml` version and `auragf.__version__` disagree, and `twine check`s the artifacts.
