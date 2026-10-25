@@ -26,6 +26,12 @@ All notable changes to the Android client. Format follows [Keep a Changelog](htt
   The coverage audit (source-level, independent of the data) found that `÷`, `n` and `z` are
   declared but **unreachable**: no input can ever produce them.
 
+* **`docs/paper/` — a submission-ready technical report** ("Aura Graph Format: a typed,
+  port-addressed document model for mathematics"): model, typing, semantics, a rewriting
+  soundness criterion, the conformance evaluation, and a named threats-to-validity section that
+  states the single-authorship and no-adoption limits. `how-to-submit.md` covers tagging,
+  Zenodo DOI, pandoc conversion and arXiv metadata.
+
 ### Changed
 
 * The reference evaluator now returns *undefined* for `±` (`SPEC` §6). It previously returned the

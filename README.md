@@ -21,6 +21,8 @@ it produces is not trapped in this app:
 * [`docs/CITATION.cff`](docs/CITATION.cff) — how to cite the software or the format.
 * [`docs/benchmarks/`](docs/benchmarks/) — the ink benchmark: methodology, seeded baseline and a
   reachability audit that found three symbols the classifier can never emit.
+* [`docs/paper/aura-agf.md`](docs/paper/aura-agf.md) — a technical report on the model, its
+  semantics and the conformance evidence, including what the evidence does *not* establish.
 
 AGF is a **draft**, and it now has two implementations that agree: the Kotlin kernel and an
 independent Python package ([`python/`](python/)), which passes all five conformance classes plus

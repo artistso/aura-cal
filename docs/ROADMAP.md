@@ -60,6 +60,9 @@ information that reorders everything else.
 
 ### G5 — Credibility
 
+* **Status:** a submission-ready technical report exists (`docs/paper/aura-agf.md`) covering the
+  model, the semantics, the soundness criterion and the conformance evidence, with a submission
+  checklist (`docs/paper/how-to-submit.md`). Not yet submitted, not yet tagged, no DOI.
 * **Pass:** a citable paper (technical report on arXiv is sufficient) describing the typed
   hypergraph, the port-admissibility model and the rewriting soundness test; and an AGF corpus
   released with a DOI (Zenodo or equivalent).
