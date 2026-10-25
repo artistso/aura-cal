@@ -32,8 +32,12 @@ information that reorders everything else.
 ### G2 — A second implementation (the standard gate)
 
 * **Status:** the Python package exists (`python/`), is written independently of the Kotlin code,
-  and passes C1–C5 plus the LaTeX projection (172/172 checks). **Not yet published to PyPI, and
-  written by the same author** — so the gate is 80% closed, not closed.
+  and passes C1–C6 plus the LaTeX projection (203/203 checks). It builds a wheel and sdist, and a
+  clean virtualenv installed from the wheel runs every CLI command, including with the unrelated
+  `agf` package installed alongside. The distribution is `aura-agf` (import `auragf`) because
+  `agf` is already on PyPI and installs its own top-level `agf` module — the original name would
+  have shadowed it. **Not yet uploaded, and written by the same author** — so the gate is 80%
+  closed, not closed.
 * **Pass:** published on PyPI, and reviewed by at least one person who did not write it.
 * **Kill signal:** the spec turns out to be under-specified for someone writing it fresh. That is
   the single most useful thing that can happen before the format hardens — it is why this gate

@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from agf import Document, Edge, Vertex, evaluate, to_latex, validate
-from agf.evaluate import evaluate_relation, parse_literal
-from agf.types import effective_type
-from agf.validate import Severity
-from agf.vocabulary import admits, ports_for
+from auragf import Document, Edge, Vertex, evaluate, to_latex, validate
+from auragf.evaluate import evaluate_relation, parse_literal
+from auragf.types import effective_type
+from auragf.validate import Severity
+from auragf.vocabulary import admits, ports_for
 
 
 def build(*specs, edges=()) -> tuple[Document, dict[str, str]]:

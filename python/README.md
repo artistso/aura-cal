@@ -1,18 +1,22 @@
-# `agf` — Aura Graph Format for Python
+# Aura Graph Format for Python (`aura-agf`)
 
 An independent, from-scratch implementation of [AGF 0.1](../docs/SPEC.md): read, write,
 validate, type-check, evaluate and translate typed mathematical documents. It shares no code
 with the reference Kotlin implementation — that is the point.
 
 ```bash
-pip install -e ".[sympy,test]"
-python -m pytest
+pip install aura-agf            # the import package is `auragf`, the command is `agf`
+pip install "aura-agf[sympy]"   # + the SymPy bridge
 ```
 
-```python
-from agf import load, validate, evaluate, to_latex
+The distribution is called `aura-agf` rather than `agf` because `agf` is already published on
+PyPI by an unrelated project (and installs a top-level `agf` module). A format implementation
+that shadows someone else's import is not a good citizen.
 
-doc = load("canvas.agf.json")           # or agf.loads(json_text)
+```python
+from auragf import load, validate, evaluate, to_latex
+
+doc = load("canvas.agf.json")           # or auragf.loads(json_text)
 for diagnostic in validate(doc):
     print(diagnostic)                   # W6 error: ... has type Relation, but exponent accepts ...
 for root in doc.roots():
@@ -20,6 +24,8 @@ for root in doc.roots():
 ```
 
 ## Command line
+
+The console script is `agf` (from the `aura-agf` distribution):
 
 ```bash
 agf validate canvas.agf.json            # W1–W8 diagnostics, exit 1 on errors
@@ -40,7 +46,7 @@ agf conformance                         # run SPEC §9 classes against docs/conf
 | §5 well-formedness W1–W7 + W8 (unbound required port, warning) | yes |
 | §6 reference evaluation, including *undefined* vs `NaN` | yes |
 | §7 LaTeX projection | yes (byte-identical to the reference on the corpus) |
-| §9 C1–C5 conformance | yes |
+| §9 C1–C6 conformance | yes (C6 needs the `test` extra) |
 | SymPy bridge (`to_sympy` / `from_sympy`) | yes, optional extra |
 
 Not implemented: LaTeX *parsing* (that lives in the reference implementation today; a shared
@@ -76,8 +82,8 @@ evidence of interoperability rather than evidence of self-consistency.
 ## SymPy bridge
 
 ```python
-from agf import load
-from agf.sympy_bridge import to_sympy
+from auragf import load
+from auragf.sympy_bridge import to_sympy
 
 doc = load("canvas.agf.json")
 expr = to_sympy(doc, doc.roots()[0].id)      # Eq(2*x + 3, 11)

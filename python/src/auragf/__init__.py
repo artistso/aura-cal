@@ -6,7 +6,7 @@ standard.
 
 Quick start::
 
-    from agf import Document, load, validate, evaluate
+    from auragf import Document, load, validate, evaluate
 
     doc = load("canvas.agf.json")
     for diagnostic in validate(doc):

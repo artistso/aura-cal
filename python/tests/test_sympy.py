@@ -6,8 +6,8 @@ import pytest
 
 sympy = pytest.importorskip("sympy")
 
-from agf import Document, evaluate, to_latex  # noqa: E402
-from agf.sympy_bridge import UnsupportedConstruct, from_sympy, to_sympy  # noqa: E402
+from auragf import Document, evaluate, to_latex  # noqa: E402
+from auragf.sympy_bridge import UnsupportedConstruct, from_sympy, to_sympy  # noqa: E402
 
 #: Documents produced by the reference parser, with the expression they should become.
 CASES = [
@@ -52,7 +52,7 @@ def test_sympy_round_trip(expression):
     original = expression(sympy)
     document, root = from_sympy(original)
     # The document is well formed …
-    from agf import validate
+    from auragf import validate
 
     assert validate(document) == []
     # … and returns the same mathematics.
@@ -63,7 +63,7 @@ def test_sympy_round_trip(expression):
 def test_round_trip_preserves_shape_for_plotting():
     document, root = from_sympy(sympy.Symbol("x") ** 2 - 3)
     assert document.get(root).variant == "add"
-    from agf.evaluate import evaluate as agf_evaluate
+    from auragf.evaluate import evaluate as agf_evaluate
 
     assert agf_evaluate(document, root, {"x": 4.0}) == pytest.approx(13.0)
 
@@ -72,7 +72,7 @@ def test_pm_is_refused_instead_of_guessed(cases):
     case = next(c for c in cases.values() if c["source"] == "x^2 = 9")
     document = Document.from_dict(case["graph"])
     # A ± document has no single SymPy value; the bridge must say so.
-    from agf.model import Edge, Vertex
+    from auragf.model import Edge, Vertex
 
     pm = Vertex(id="pm", kind="operator", token="\\pm", label="Plus-minus",
                 type="Operator", variant="pm")

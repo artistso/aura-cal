@@ -222,9 +222,12 @@ publishes steps must keep them true on a fixed set of environments.
 
 The **reference** implementation is a Kotlin kernel of 6 704 lines with no Android dependencies,
 embedded in an application and exercised by 60 executable specifications that run both in the app
-and under Gradle. The **second** implementation is a Python package (`agf`) written from
-`docs/SPEC.md` alone, sharing no code (2 109 lines, 55 tests): reader/writer, vocabulary, inference, validation,
-evaluator, LaTeX projection, a SymPy bridge and a CLI.
+and under Gradle. The **second** implementation is a Python package written from `docs/SPEC.md`
+alone, sharing no code (2 109 lines, 55 tests): reader/writer, vocabulary, inference, validation,
+evaluator, LaTeX projection, a SymPy bridge and a CLI. It is distributed as `aura-agf` with the
+import name `auragf`, because `agf` is already occupied on PyPI by an unrelated project that
+installs a top-level `agf` module — a format implementation should not shadow another package's
+imports.
 
 ### 7.2 Corpus and results
 

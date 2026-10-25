@@ -30,7 +30,7 @@ the LaTeX projection (172 checks). Treat it as a proposal, not yet a standard.
 
 ```bash
 cd python && pip install -e ".[sympy,test]" && python -m pytest   # 55 tests
-python -m agf.cli conformance                                     # 172/172
+python -m auragf.cli conformance                                  # 203/203
 ```
 
 ```python

@@ -308,7 +308,9 @@ than stored.
 
 Totals from the Python runner: **203 checks, 0 failures**.
 
-Run the Python side with `python -m agf.cli conformance`, or `pytest` inside `python/`.
+Run the Python side with `python -m auragf.cli conformance` (or `pytest` inside `python/`). The
+distribution is installed as `aura-agf`, because `agf` is taken on PyPI by an unrelated project;
+the console script is still `agf`.
 
 > **Caveat.** Both implementations share an author. Cross-implementation agreement catches
 > specification ambiguity — it has already forced two of them to be resolved — but not a shared

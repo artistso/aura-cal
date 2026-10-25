@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from agf import Document, dumps, evaluate, infer_types, loads, to_latex, validate
-from agf.conformance import run
-from agf.model import Edge, Vertex
-from agf.validate import Severity
+from auragf import Document, dumps, evaluate, infer_types, loads, to_latex, validate
+from auragf.conformance import run
+from auragf.model import Edge, Vertex
+from auragf.validate import Severity
 
 CHECKS = (
     "C1 round-trip",

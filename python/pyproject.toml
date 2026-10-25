@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agf"
+name = "aura-agf"
 version = "0.1.0"
 description = "Aura Graph Format — read, write, validate and evaluate typed mathematical documents"
 readme = "README.md"
@@ -29,10 +29,10 @@ Homepage = "https://github.com/artistso/aura-cal"
 Specification = "https://github.com/artistso/aura-cal/blob/main/docs/SPEC.md"
 
 [project.scripts]
-agf = "agf.cli:main"
+agf = "auragf.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/agf"]
+packages = ["src/auragf"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

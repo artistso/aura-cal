@@ -32,29 +32,37 @@ class CheckResult:
     check: str
     passed: bool
     detail: str = ""
+    skipped: bool = False
 
 
 @dataclass
 class Report:
     results: list[CheckResult] = field(default_factory=list)
 
-    def add(self, case: str, check: str, passed: bool, detail: str = "") -> None:
-        self.results.append(CheckResult(case, check, passed, detail))
+    def add(self, case: str, check: str, passed: bool, detail: str = "",
+            skipped: bool = False) -> None:
+        self.results.append(CheckResult(case, check, passed, detail, skipped))
 
     @property
     def passed(self) -> int:
-        return sum(1 for r in self.results if r.passed)
+        return sum(1 for r in self.results if r.passed and not r.skipped)
 
     @property
     def failed(self) -> int:
-        return sum(1 for r in self.results if not r.passed)
+        return sum(1 for r in self.results if not r.passed and not r.skipped)
+
+    @property
+    def skipped(self) -> int:
+        return sum(1 for r in self.results if r.skipped)
 
     def failures(self) -> list[CheckResult]:
-        return [r for r in self.results if not r.passed]
+        return [r for r in self.results if not r.passed and not r.skipped]
 
     def by_check(self) -> dict[str, tuple[int, int]]:
         out: dict[str, tuple[int, int]] = {}
         for result in self.results:
+            if result.skipped:
+                continue
             passed, total = out.get(result.check, (0, 0))
             out[result.check] = (passed + (1 if result.passed else 0), total + 1)
         return out
@@ -64,6 +72,12 @@ class Report:
         for check, (passed, total) in sorted(self.by_check().items()):
             status = "PASS" if passed == total else "FAIL"
             lines.append(f"{status}  {check:<22} {passed}/{total}")
+        if self.skipped:
+            reasons = sorted({r.check for r in self.results if r.skipped})
+            lines.append("")
+            for check in reasons:
+                detail = next(r.detail for r in self.results if r.skipped and r.check == check)
+                lines.append(f"SKIP  {check:<22} {detail}")
         failures = self.failures()
         if failures:
             lines.append("")
@@ -88,15 +102,17 @@ def run(corpus_dir: str | Path) -> Report:
     # C6 validates against the *published* schema file rather than a copy of it, so the two
     # cannot drift apart silently. jsonschema is a test-only dependency.
     schema = None
+    schema_skip: str | None = None
     schema_path = corpus.parent / "aura-graph.schema.json"
-    if schema_path.exists():
+    if not schema_path.exists():
+        schema_skip = f"no schema at {schema_path}"
+    else:
         try:
             import jsonschema
-        except ImportError as exc:  # pragma: no cover - environment problem, not a data problem
-            raise RuntimeError(
-                "C6 needs the `jsonschema` package; install with `pip install 'agf[test]'`"
-            ) from exc
-        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        except ImportError:  # C6 is optional; a missing library must not fail the run
+            schema_skip = "jsonschema not installed (pip install 'aura-agf[test]')"
+        else:
+            schema = json.loads(schema_path.read_text(encoding="utf-8"))
 
     cases_path = corpus / "cases.json"
     if cases_path.exists():
@@ -188,6 +204,9 @@ def run(corpus_dir: str | Path) -> Report:
                                    if d.severity is Severity.ERROR])
                 report.add(name, "C2 severity", error_count == case["expected_errors"],
                            f"expected {case['expected_errors']} errors, received {error_count}")
+
+    if schema_skip is not None and cases_path.exists():
+        report.add("(corpus)", "C6 schema", False, schema_skip, skipped=True)
 
     return report
 

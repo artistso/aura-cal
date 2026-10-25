@@ -31,7 +31,7 @@ def _require_sympy():
         import sympy  # noqa: F401
     except ImportError as exc:  # pragma: no cover - depends on the environment
         raise UnsupportedConstruct(
-            "SymPy is not installed; pip install 'agf[sympy]'"
+            "SymPy is not installed; pip install 'aura-agf[sympy]'"
         ) from exc
     import sympy
 
