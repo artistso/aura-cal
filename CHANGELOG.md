@@ -18,6 +18,14 @@ All notable changes to the Android client. Format follows [Keep a Changelog](htt
   caveat plainly: agreement between two implementations by one author catches ambiguity, not
   shared conceptual error.
 
+* **`docs/benchmarks/` — a reproducible ink benchmark.** 26 glyphs, 5 perturbation levels,
+  seeded so runs are diffable; `tools/InkBenchmark.kt` writes `ink-baseline.{md,json}` and accepts
+  an external `strokes.tsv` so the same harness can score real captured handwriting.
+  Baseline: 38.7% top-1 / 53.3% top-3 on synthetic templates — published with the explicit
+  warning that it is **not** a recognition rate, plus the methodology and the reasons.
+  The coverage audit (source-level, independent of the data) found that `÷`, `n` and `z` are
+  declared but **unreachable**: no input can ever produce them.
+
 ### Changed
 
 * The reference evaluator now returns *undefined* for `±` (`SPEC` §6). It previously returned the

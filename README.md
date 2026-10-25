@@ -19,6 +19,8 @@ it produces is not trapped in this app:
 * [`docs/aura-graph.schema.json`](docs/aura-graph.schema.json) — machine-checkable JSON Schema.
 * [`docs/ROADMAP.md`](docs/ROADMAP.md) — gates toward adoption, each with a kill condition.
 * [`docs/CITATION.cff`](docs/CITATION.cff) — how to cite the software or the format.
+* [`docs/benchmarks/`](docs/benchmarks/) — the ink benchmark: methodology, seeded baseline and a
+  reachability audit that found three symbols the classifier can never emit.
 
 AGF is a **draft**, and it now has two implementations that agree: the Kotlin kernel and an
 independent Python package ([`python/`](python/)), which passes all five conformance classes plus

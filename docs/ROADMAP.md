@@ -84,6 +84,17 @@ information that reorders everything else.
 * Stability bounds, CI, release runbook — done.
 * Format, schema and licence published — done (`docs/SPEC.md`, `docs/aura-graph.schema.json`).
 
+### G7 — Ink is measured, not asserted
+
+* **Status:** a reproducible harness exists (`tools/InkBenchmark.kt`), a seeded baseline is
+  published (`docs/benchmarks/`), and the audit found three symbols the classifier can never
+  emit. Top-1 on the synthetic template corpus is 38.7% — a proxy, not a recognition rate.
+* **Pass:** ≥ 80% top-1 on **real captured strokes** (3–5 writers, ~50 samples/glyph) and the
+  reachability defects closed. No accuracy claim in the listing until this gate passes.
+* **Kill signal:** real-handwriting accuracy stays below ~60% after collecting data. Then ink is
+  a convenience, not a feature: demote it to "pen input for simple operators" and stop
+  advertising recognition.
+
 ## Next (2.2 — pick one, not three)
 
 **G2 landed in this repository** (`python/`, independent of the Kotlin kernel, passing C1–C5).
