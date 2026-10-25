@@ -89,7 +89,22 @@ jobs:
           gradle-version: '9.3.1'
 
       - name: Assemble debug APK
-        run: gradle --no-daemon assembleDebug --stacktrace
+        run: |
+          set +e -o pipefail
+          gradle --no-daemon assembleDebug --stacktrace 2>&1 | tee /tmp/gradle.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            python3 .github/scripts/annotate_failure.py /tmp/gradle.log "Gradle assembleDebug failed"
+            exit "$status"
+          fi
+
+      - name: Upload the build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-log
+          path: /tmp/gradle.log
+          if-no-files-found: ignore
 
   conformance:
     name: AGF conformance (Python)
