@@ -36,8 +36,11 @@ information that reorders everything else.
   clean virtualenv installed from the wheel runs every CLI command, including with the unrelated
   `agf` package installed alongside. The distribution is `aura-agf` (import `auragf`) because
   `agf` is already on PyPI and installs its own top-level `agf` module — the original name would
-  have shadowed it. **Not yet uploaded, and written by the same author** — so the gate is 80%
-  closed, not closed.
+  have shadowed it. Publication is wired up (`.github/workflows/publish-pypi.yml`, Trusted
+  Publishing — see `docs/publishing-pypi.md`): the package is authored by steven owens, builds
+  cleanly and awaits only the one-time PyPI account-side setup plus an `aura-agf-v0.1.0`
+  release. **Not yet uploaded, and written by the same author** — so the gate is 80%
+  closed, not closed, until it is live *and* reviewed by someone else.
 * **Pass:** published on PyPI, and reviewed by at least one person who did not write it.
 * **Kill signal:** the spec turns out to be under-specified for someone writing it fresh. That is
   the single most useful thing that can happen before the format hardens — it is why this gate

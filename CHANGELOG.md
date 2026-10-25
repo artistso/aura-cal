@@ -6,6 +6,16 @@ All notable changes to the Android client. Format follows [Keep a Changelog](htt
 
 ### Added
 
+* **Named authorship and a PyPI publish pipeline.** steven owens is now the named author on
+  the technical report, `docs/CITATION.cff`, the SPEC and the `aura-agf` package metadata.
+  `.github/workflows/publish-pypi.yml` publishes via PyPI Trusted Publishing (OIDC, no stored
+  token): it re-runs the tests and conformance suite, refuses to build when the release tag,
+  `pyproject.toml` version and `auragf.__version__` disagree, and `twine check`s the artifacts.
+  The one-time account-side setup is in `docs/publishing-pypi.md`. While preparing the first
+  upload: `python/LICENSE` (a verbatim copy of `LICENSE`, drift-checked in the workflow) so
+  the sdist/wheel actually carry the licence text, and the PyPI README's repository-relative
+  links became absolute so they work on pypi.org. **Not yet uploaded** — the first release
+  (`aura-agf-v0.1.0`) does that.
 * **`python/` — an independent implementation of AGF 0.1.** Reader/writer (with unknown-member
   preservation), the full vocabulary and port table, type inference, well-formedness rules
   W1–W7 plus W8, the reference evaluator (`undefined` ≠ `NaN`), the LaTeX projection, a SymPy

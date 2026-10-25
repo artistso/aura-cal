@@ -2,7 +2,7 @@
 
 **Technical report — draft for submission. 2026-10-25.**
 
-**Author:** artistso
+**Author:** steven owens
 **Software:** https://github.com/artistso/aura-cal (Apache-2.0)
 **Specification:** `docs/SPEC.md` (AGF 0.1, draft) · **Licence of this text:** CC-BY-4.0
 
