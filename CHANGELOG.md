@@ -32,6 +32,21 @@ All notable changes to the Android client. Format follows [Keep a Changelog](htt
   states the single-authorship and no-adoption limits. `how-to-submit.md` covers tagging,
   Zenodo DOI, pandoc conversion and arXiv metadata.
 
+### Fixed — CI could not build the app, and nobody could see why
+
+* **`assembleDebug` failed on every CI run since the repository was imported.** The debug signing
+  config points at `${rootDir}/debug.keystore`; `.gitignore` re-includes that name but the file was
+  never committed, because AI Studio creates it locally. CI now generates a throwaway debug key.
+  `assembleDebug` passing is the first actual compile check of the Compose UI: `kotlinc` cannot
+  typecheck it without the Android artifacts, so a broken screen used to be undetectable until
+  someone opened Android Studio.
+* **The kernel gate no longer needs the Android SDK.** `tools/RunKernelSpecs.kt` runs the same 60
+  specs on a plain JVM and exits non-zero on failure. Previously "Set up Android SDK failed" and
+  "the kernel is broken" produced identical red checks.
+* Failed builds now annotate themselves with the lines that carry the cause
+  (`.github/scripts/annotate_failure.py`), because GitHub's log download is not reachable from
+  every environment and a red check that says only "failed" is not a diagnosis.
+
 ### Changed
 
 * The reference evaluator now returns *undefined* for `±` (`SPEC` §6). It previously returned the

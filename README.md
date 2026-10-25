@@ -9,6 +9,7 @@ Android client, Jetpack Compose, fully offline. 338-symbol library, symbolic sol
 2D/3D plotting, stylus ink recognition and an executable kernel specification suite.
 
 **Status:** in closed testing on Google Play (2.1).
+[![CI](https://github.com/artistso/aura-cal/actions/workflows/android.yml/badge.svg)](https://github.com/artistso/aura-cal/actions/workflows/android.yml)
 
 Aura also defines a document format — **Aura Graph Format (AGF, draft 0.1)** — so the mathematics
 it produces is not trapped in this app:
