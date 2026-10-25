@@ -8,7 +8,19 @@ LaTeX, MathML and JSON are *serialisations* of that graph — never the source o
 Android client, Jetpack Compose, fully offline. 338-symbol library, symbolic solving,
 2D/3D plotting, stylus ink recognition and an executable kernel specification suite.
 
-**Status:** in closed testing on Google Play.
+**Status:** in closed testing on Google Play (2.1).
+
+Aura also defines a document format — **Aura Graph Format (AGF, draft 0.1)** — so the mathematics
+it produces is not trapped in this app:
+
+* [`docs/SPEC.md`](docs/SPEC.md) — the format: data model, types, well-formedness, reference
+  evaluation semantics, conformance classes, and an honest section on what would make it a
+  standard.
+* [`docs/aura-graph.schema.json`](docs/aura-graph.schema.json) — machine-checkable JSON Schema.
+* [`docs/ROADMAP.md`](docs/ROADMAP.md) — gates toward adoption, each with a kill condition.
+* [`docs/CITATION.cff`](docs/CITATION.cff) — how to cite the software or the format.
+
+AGF is a **draft with a single implementation**. Treat it as a proposal, not a standard.
 
 ---
 
@@ -125,6 +137,10 @@ glass with hairline borders; ghost candidates animate as marching dashed beziers
 ---
 
 ## Licence and provenance
+
+Code is licensed **Apache-2.0** ([`LICENSE`](LICENSE)); the specification under `docs/` is
+CC-BY-4.0. Apache-2.0 was chosen over MIT deliberately: it adds an explicit patent grant, which
+matters for anything that institutions and companies are expected to adopt.
 
 Built as a native port of the Aura web prototype (see
 `public/assets/aistudio/aura-mathematical-graph-editor__2__e12efca7.zip`). The typed
