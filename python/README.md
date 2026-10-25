@@ -55,10 +55,11 @@ PASS  C2 severity            5/5
 PASS  C2 well-formedness     30/30
 PASS  C3 typing              30/30
 PASS  C4 evaluation          30/30
-PASS  C5 rewrite soundness   9/9
+PASS  C5 rewrite soundness   10/10
+PASS  C6 schema              30/30
 PASS  P7 latex projection    30/30
 
-172 passed, 0 failed
+203 passed, 0 failed
 ```
 
 The corpus (`../docs/conformance/`) is generated from the reference implementation by

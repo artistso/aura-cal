@@ -47,12 +47,26 @@ private class Json {
     }
 }
 
-private fun encodeGraph(graph: AuraGraph): String {
+/**
+ * Canonical ids.
+ *
+ * The parser mints a fresh UUID for every vertex, so a regenerated corpus would differ from the
+ * committed one on every run even when nothing about the format changed -- which makes "regenerate
+ * and diff" useless as a review tool, and makes byte-level reproducibility impossible. Ids are
+ * opaque to readers (SPEC section 3), so the generator renames them positionally: vertices `n0`,
+ * `n1`, ... in document order, edges `e0`, `e1`, ....
+ */
+private fun canonicalIds(graph: AuraGraph): Map<String, String> =
+    graph.nodes.withIndex().associate { (i, n) -> n.id to "n$i" }
+
+private fun rename(ids: Map<String, String>, id: String): String = ids[id] ?: id
+
+private fun encodeGraph(graph: AuraGraph, ids: Map<String, String> = canonicalIds(graph)): String {
     val sb = StringBuilder()
     sb.append("{\"nodes\": [")
     graph.nodes.forEachIndexed { i, n ->
         if (i > 0) sb.append(", ")
-        sb.append("{\"id\": "); Json().also { it.str(n.id); sb.append(it.sb) }
+        sb.append("{\"id\": "); Json().also { it.str(rename(ids, n.id)); sb.append(it.sb) }
         sb.append(", \"kind\": \"").append(n.kind.wireName)
         sb.append("\", \"type\": \"").append(n.type.name)
         sb.append("\", \"token\": "); Json().also { it.str(n.token); sb.append(it.sb) }
@@ -65,20 +79,20 @@ private fun encodeGraph(graph: AuraGraph): String {
     sb.append("], \"edges\": [")
     graph.edges.forEachIndexed { i, e ->
         if (i > 0) sb.append(", ")
-        sb.append("{\"id\": \"").append(e.id).append("\"")
-        sb.append(", \"source\": \"").append(e.source).append("\"")
+        sb.append("{\"id\": \"e").append(i).append("\"")
+        sb.append(", \"source\": \"").append(rename(ids, e.source)).append("\"")
         sb.append(", \"port\": \"").append(e.port.wireName).append("\"")
-        sb.append(", \"target\": \"").append(e.target).append("\"")
+        sb.append(", \"target\": \"").append(rename(ids, e.target)).append("\"")
         sb.append(", \"role\": \"").append(e.role).append("\"}")
     }
     sb.append("]}")
     return sb.toString()
 }
 
-private fun typesOf(graph: AuraGraph): Map<String, String> {
+private fun typesOf(graph: AuraGraph, ids: Map<String, String> = canonicalIds(graph)): Map<String, String> {
     val index = Engine.indexGraph(graph)
     val cache = LinkedHashMap<String, MathType>()
-    return graph.nodes.associate { it.id to Engine.effectiveType(index, it.id, cache).name }
+    return graph.nodes.associate { rename(ids, it.id) to Engine.effectiveType(index, it.id, cache).name }
 }
 
 private fun valueOf(graph: AuraGraph, rootId: String?): Double? {
@@ -143,14 +157,15 @@ fun main() {
         val diagnostics = Engine.diagnose(parsed.graph)
         val errorCount = diagnostics.count { it.severity == DiagnosticSeverity.Error }
         val value = valueOf(parsed.graph, parsed.rootId)
+        val ids = canonicalIds(parsed.graph)
 
         cases.append("    {\n")
         cases.append("      \"name\": \"case_${caseIdx}\",\n")
         cases.append("      \"source\": "); Json().also { it.str(source); cases.append(it.sb) }; cases.append(",\n")
-        cases.append("      \"root\": "); if (parsed.rootId == null) cases.append("null") else Json().also { it.str(parsed.rootId!!); cases.append(it.sb) }; cases.append(",\n")
-        cases.append("      \"graph\": ").append(encodeGraph(parsed.graph)).append(",\n")
+        cases.append("      \"root\": "); if (parsed.rootId == null) cases.append("null") else Json().also { it.str(rename(ids, parsed.rootId!!)); cases.append(it.sb) }; cases.append(",\n")
+        cases.append("      \"graph\": ").append(encodeGraph(parsed.graph, ids)).append(",\n")
         cases.append("      \"types\": {")
-        typesOf(parsed.graph).entries.forEachIndexed { i, e ->
+        typesOf(parsed.graph, ids).entries.forEachIndexed { i, e ->
             if (i > 0) cases.append(", ")
             Json().also { it.str(e.key); cases.append(it.sb) }
             cases.append(": \"").append(e.value).append("\"")

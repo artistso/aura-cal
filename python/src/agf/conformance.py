@@ -81,9 +81,22 @@ def _close(actual: float | None, expected: float | None, tolerance: float = 1e-9
 
 
 def run(corpus_dir: str | Path) -> Report:
-    """Run C1–C5 against ``corpus_dir`` (normally ``docs/conformance``)."""
+    """Run C1–C6 against ``corpus_dir`` (normally ``docs/conformance``)."""
     corpus = Path(corpus_dir)
     report = Report()
+
+    # C6 validates against the *published* schema file rather than a copy of it, so the two
+    # cannot drift apart silently. jsonschema is a test-only dependency.
+    schema = None
+    schema_path = corpus.parent / "aura-graph.schema.json"
+    if schema_path.exists():
+        try:
+            import jsonschema
+        except ImportError as exc:  # pragma: no cover - environment problem, not a data problem
+            raise RuntimeError(
+                "C6 needs the `jsonschema` package; install with `pip install 'agf[test]'`"
+            ) from exc
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
 
     cases_path = corpus / "cases.json"
     if cases_path.exists():
@@ -124,6 +137,20 @@ def run(corpus_dir: str | Path) -> Report:
             actual = None if root is None else evaluate(document, root)
             report.add(name, "C4 evaluation", _close(actual, expected_value),
                        f"expected {expected_value}, received {actual}")
+
+            # -- C6: the published schema accepts the document ----------------
+            # A schema that rejects the documents a conformant implementation emits is not a
+            # specification, it is decoration. This check is what keeps the two aligned.
+            if schema is not None:
+                candidate = {"agf": "0.1",
+                             "nodes": case["graph"]["nodes"],
+                             "edges": case["graph"]["edges"]}
+                try:
+                    jsonschema.validate(candidate, schema)
+                    report.add(name, "C6 schema", True)
+                except jsonschema.ValidationError as exc:
+                    report.add(name, "C6 schema", False,
+                               f"{exc.json_path}: {exc.message}")
 
             # -- LaTeX projection (SPEC §7) ----------------------------------
             if case.get("latex") is not None and root is not None:

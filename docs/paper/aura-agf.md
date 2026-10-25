@@ -203,22 +203,28 @@ relation `ρ` in the document and every environment `σ` in a fixed sample set, 
 and the transformed document define a truth value for `ρ` under `σ`, they agree.
 
 The criterion is intentionally weak (it samples rather than proves) and intentionally
-implementation-neutral (it constrains any step a producer is willing to expose). It caught two
-classes of error during development: a solver step that swapped sides of an inequality without
-flipping the relation, and a constant-folding rule that collapsed a `±` subtree.
+implementation-neutral (it constrains any step a producer is willing to expose).
 
-Sampling is not verification, and we do not claim otherwise. Its role is regression pressure: a
-producer that publishes steps must keep them true on a fixed set of environments.
+At the time of writing it reports no violations: the solver's steps preserve truth on all five
+fixture equations across twelve environments each. We therefore present it as a *regression
+criterion*, not as a discovery. The failure modes it is designed to exclude are concrete — a step
+that adds a term to one side only, a step that swaps the sides of an inequality without flipping
+the relation, and constant folding of a two-valued `±` subtree; the last of these did occur in the
+reference implementation (Section 7.3, item 2) and was found by conformance rather than by this
+criterion, before the criterion was written.
+
+Sampling is not verification, and we do not claim otherwise. Its role is pressure: a producer that
+publishes steps must keep them true on a fixed set of environments.
 
 ## 7. Implementation and conformance
 
 ### 7.1 Two implementations
 
-The **reference** implementation is a Kotlin kernel of ~6k lines with no Android dependencies,
+The **reference** implementation is a Kotlin kernel of 6 704 lines with no Android dependencies,
 embedded in an application and exercised by 60 executable specifications that run both in the app
 and under Gradle. The **second** implementation is a Python package (`agf`) written from
-`docs/SPEC.md` alone, sharing no code: reader/writer, vocabulary, inference, validation, evaluator,
-LaTeX projection, a SymPy bridge and a CLI.
+`docs/SPEC.md` alone, sharing no code (2 109 lines, 55 tests): reader/writer, vocabulary, inference, validation,
+evaluator, LaTeX projection, a SymPy bridge and a CLI.
 
 ### 7.2 Corpus and results
 
@@ -234,7 +240,14 @@ C5.
 | C3 typing | 30 | ✓ | 30/30 |
 | C4 evaluation | 30 | ✓ | 30/30 |
 | C5 rewriting soundness | 10 | ✓ | 10/10 |
+| C6 schema conformance | 30 | schema source | 30/30 |
 | §7 LaTeX projection | 30 | production | 30/30 byte-identical |
+
+C6 exists because the schema is a separate artifact from the prose specification: it validates
+every corpus document against the *published* schema file rather than a copy, so the two cannot
+drift apart without a failure. The published schema and the reference implementation agree today;
+nothing in the design guarantees they will tomorrow, which is precisely why the check is in the
+corpus rather than in a review habit.
 
 The projection result is the sharpest agreement test: two renderers written independently produce
 identical output on all 30 documents, including parenthesisation under precedence.
@@ -265,7 +278,8 @@ fresh reading exposes. That is the argument for conformance corpora over prose.
 
 ## 8. Evaluation: what is measured, what is not
 
-* **Agreement.** 173/173 conformance checks across six classes.
+* **Agreement.** 203/203 conformance checks across seven classes, one of which validates
+every corpus document against the published JSON Schema.
 * **Robustness.** Input is bounded (2 048 tokens, 96 grouping levels, 192 tree levels) so that
   pathological input raises a diagnostic rather than a stack overflow, and rendering is linear in
   the number of vertices.

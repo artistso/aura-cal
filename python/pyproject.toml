@@ -22,7 +22,7 @@ dependencies = []
 
 [project.optional-dependencies]
 sympy = ["sympy>=1.12"]
-test = ["pytest>=7.0"]
+test = ["pytest>=7.0", "jsonschema>=4.0"]
 
 [project.urls]
 Homepage = "https://github.com/artistso/aura-cal"
