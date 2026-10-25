@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Aura golden badge square -->
+    <path
+        android:fillColor="#F0B45A"
+        android:pathData="M34,26 L74,26 C78.4,26 82,29.6 82,34 L82,74 C82,78.4 78.4,82 74,82 L34,82 C29.6,82 26,78.4 26,74 L26,34 C26,29.6 29.6,26 34,26 Z" />
+    <!-- Stylised 'A' hypergraph glyph inside the badge -->
+    <path
+        android:fillColor="#1A1206"
+        android:pathData="M54,35 L68,71 L61,71 L57.8,62 L50.2,62 L47,71 L40,71 L54,35 Z M54,45 L51.5,56 L56.5,56 L54,45 Z" />
+    <!-- Teal coherent port dot at top-right -->
+    <path
+        android:fillColor="#5EEAD4"
+        android:pathData="M80,28 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+</vector>

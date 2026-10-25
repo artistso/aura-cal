@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Aura</string>
+    <string name="subtitle_hypergraph">typed hypergraph</string>
+    <string name="status_coherent">coherent</string>
+    <string name="status_ill_typed">ill-typed</string>
+    <string name="action_auto_connect">Auto-connect</string>
+    <string name="action_write">Write</string>
+    <string name="action_symbols">Symbols</string>
+    <string name="action_export">Export</string>
+    <string name="tab_inspect">inspect</string>
+    <string name="tab_solve">solve</string>
+    <string name="tab_plot">plot</string>
+    <string name="tab_connect">connect</string>
+    <string name="tab_verify">verify</string>
+</resources>

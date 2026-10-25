@@ -1,0 +1,6 @@
+{
+  "name": "Aura",
+  "description": "A connection-first mathematical hypergraph canvas with homeomorphic ghost paths, symbolic algebra, 2D/3D plotting, and automated theorem verification.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
