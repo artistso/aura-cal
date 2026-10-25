@@ -25,7 +25,8 @@ abstract: >-
   precedence, parsing, evaluation, symbolic rewriting soundness, discovery verification and
   input robustness.
 authors:
-  - name: "artistso"
+  - family-names: "Owens"
+    given-names: "steven"
     alias: "artistso"
 repository-code: "https://github.com/artistso/aura-cal"
 url: "https://github.com/artistso/aura-cal"

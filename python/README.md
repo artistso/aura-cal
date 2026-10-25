@@ -1,6 +1,7 @@
 # Aura Graph Format for Python (`aura-agf`)
 
-An independent, from-scratch implementation of [AGF 0.1](../docs/SPEC.md): read, write,
+An independent, from-scratch implementation of
+[AGF 0.1](https://github.com/artistso/aura-cal/blob/main/docs/SPEC.md): read, write,
 validate, type-check, evaluate and translate typed mathematical documents. It shares no code
 with the reference Kotlin implementation — that is the point.
 
@@ -68,9 +69,11 @@ PASS  P7 latex projection    30/30
 203 passed, 0 failed
 ```
 
-The corpus (`../docs/conformance/`) is generated from the reference implementation by
-`../tools/GenerateConformance.kt` and committed, so these results are reproducible without a
-JVM.
+The corpus
+([`docs/conformance/`](https://github.com/artistso/aura-cal/tree/main/docs/conformance)) is
+generated from the reference implementation by
+[`tools/GenerateConformance.kt`](https://github.com/artistso/aura-cal/blob/main/tools/GenerateConformance.kt)
+and committed, so these results are reproducible without a JVM.
 
 ## Honest caveat
 
@@ -96,19 +99,24 @@ raise `UnsupportedConstruct` instead of silently producing something wrong.
 
 ## Publishing (maintainers)
 
-The name `aura-agf` is unclaimed on PyPI; `agf` is not, and cannot be used. Do a dry run first so a
-mistake lands on TestPyPI rather than on the real index — a deleted release keeps its version
-number forever and cannot be re-uploaded.
+Releases publish from GitHub Actions via PyPI **Trusted Publishing** (OIDC) — no API token is
+stored anywhere, and none should ever be pasted into a chat, issue or commit. The one-time
+account setup and the exact field values PyPI asks for are in
+[`docs/publishing-pypi.md`](https://github.com/artistso/aura-cal/blob/main/docs/publishing-pypi.md).
 
-```bash
-cd python
-python -m build                                   # writes dist/aura_agf-0.1.0.{whl,tar.gz}
-python -m twine check dist/*                      # metadata renders (README, licence links)
-python -m twine upload --repository testpypi dist/*
-pip install --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple/ aura-agf   # verify
-python -m twine upload dist/*                     # for real
-```
+The flow, once that setup exists:
 
-Then bump `version` in `pyproject.toml`, tag the commit `agf-0.1`, and attach the sdist to the
-GitHub release so the paper can cite an immutable artifact as well as the package.
+1. Bump `version` in `pyproject.toml` **and** `__version__` in `src/auragf/__init__.py`
+   (a deleted PyPI release keeps its version number forever and cannot be re-uploaded —
+   so never reuse a number).
+2. Dry run: GitHub → *Actions* → *Publish to PyPI* → *Run workflow* → target `testpypi`.
+   Verify with
+   `pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ aura-agf`.
+3. For real: GitHub → *Releases* → new release with tag `aura-agf-vX.Y.Z` (matching
+   `pyproject.toml`). The workflow tests, builds, runs `twine check`, and publishes.
+
+`python/LICENSE` is a verbatim copy of the repository `LICENSE` so the sdist and wheel carry
+the licence text; the publish workflow fails if the two ever drift apart.
+
+A manual `twine upload` from a maintainer's own machine (token in *your* environment only)
+remains a fallback, but the workflow is the supported route.

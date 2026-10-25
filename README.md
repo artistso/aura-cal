@@ -38,7 +38,7 @@ kotlinc app/src/main/java/com/example/aura/kernel/*.kt tools/RunKernelSpecs.kt \
 java -cp build/kernel-specs.jar kernel.specs.KernelSpecs
 
 # 2. The independent Python implementation — 55 tests
-pip install "aura-agf[test]"            # or: cd python && pip install -e ".[sympy,test]"
+cd python && pip install -e ".[sympy,test]" && cd ..
 python -m pytest python/tests
 
 # 3. Cross-implementation conformance — 203 checks

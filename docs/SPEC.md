@@ -1,5 +1,6 @@
 # Aura Graph Format (AGF) — v0.1 (draft)
 
+**Editor:** steven owens
 **Status:** draft for external review. This document specifies a data format. It is *not yet a
 standard*: a format becomes a standard when at least two independent implementations agree and
 a community depends on it. Today there is one implementation (this repository) and zero external

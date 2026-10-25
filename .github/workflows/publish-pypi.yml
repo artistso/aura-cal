@@ -1,0 +1,150 @@
+name: Publish to PyPI
+
+# Publishes the `aura-agf` distribution (python/) via PyPI Trusted Publishing (OIDC).
+# No API token is stored in this repository. PyPI trusts *this workflow file* in *this
+# repository* running under the `pypi` / `testpypi` environments below -- the one-time
+# account-side setup that creates that trust is documented in docs/publishing-pypi.md
+# (the workflow filename and environment names there must match this file exactly).
+#
+# Real releases:  publish a GitHub Release whose tag is `aura-agf-vX.Y.Z`.
+# Dry runs:       run this workflow manually and pick `testpypi` (or `build-only`).
+# Android releases are ignored: only tags starting with `aura-agf-` reach the build job.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Where to publish (build-only just builds and checks)
+        type: choice
+        required: true
+        default: build-only
+        options:
+          - build-only
+          - testpypi
+          - pypi
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-pypi-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Test, build and check
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.ref_name, 'aura-agf-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # python/LICENSE is a verbatim copy of the repo LICENSE so the artifacts carry the
+      # licence text. Fail loudly rather than ship a drifted copy.
+      - name: Check the licence copies agree
+        run: diff -u LICENSE python/LICENSE
+
+      # A PyPI version number, once uploaded, can never be reused -- so refuse to build
+      # a release whose tag, pyproject version and __version__ disagree.
+      - name: Check versions agree
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF'
+          import os, re, tomllib
+          from pathlib import Path
+
+          project = tomllib.loads(Path("python/pyproject.toml").read_text())["project"]
+          version = project["version"]
+          init = Path("python/src/auragf/__init__.py").read_text()
+          module_version = re.search(r'__version__\s*=\s*"([^"]+)"', init).group(1)
+          assert module_version == version, (
+              f"auragf.__version__ ({module_version}) != pyproject version ({version})"
+          )
+          print(f"package version: {version}")
+
+          if os.environ.get("GITHUB_EVENT_NAME") == "release":
+              tag = os.environ["GITHUB_REF_NAME"]
+              expected = f"aura-agf-v{version}"
+              assert tag == expected, f"release tag {tag!r} must be {expected!r}"
+              print(f"release tag OK: {tag}")
+          EOF
+
+      - name: Install, test and run conformance
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip build twine
+          pip install -e "python/.[sympy,test]"
+          python -m pytest -q python/tests
+          python -m auragf.cli conformance docs/conformance
+
+      - name: Build sdist and wheel
+        working-directory: python
+        run: |
+          set -euo pipefail
+          python -m build
+          python -m twine check dist/*
+          ls -l dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aura-agf-dist
+          path: python/dist/
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.target == 'testpypi'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/aura-agf
+    permissions:
+      id-token: write
+      attestations: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: aura-agf-dist
+          path: dist/
+
+      - name: Publish to TestPyPI (trusted publishing)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    name: Publish to PyPI
+    if: >-
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: pypi
+      url: https://pypi.org/p/aura-agf
+    permissions:
+      id-token: write
+      attestations: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: aura-agf-dist
+          path: dist/
+
+      - name: Publish to PyPI (trusted publishing)
+        uses: pypa/gh-action-pypi-publish@release/v1

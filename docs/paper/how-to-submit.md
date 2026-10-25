@@ -7,9 +7,11 @@ first report; it is a problem only if the abstract reads as if it were otherwise
 
 ## 1. Before you submit
 
-- [ ] **Put your name on it.** A format with no identifiable author reads as abandoned. `artistso`
-      works, a legal name works better for citation.
-- [ ] Make the code citable *at this commit*: GitHub → *Releases* → tag `agf-0.1` (or `v2.1`).
+- [x] **Put your name on it.** Done — steven owens is the named author on the report,
+      `docs/CITATION.cff` and the `aura-agf` package metadata. (A format with no identifiable
+      author reads as abandoned; a legal name works better for citation than a handle.)
+- [ ] Make the code citable *at this commit*: GitHub → *Releases* → tag `aura-agf-v0.1.0`
+      (the same release also publishes the package to PyPI — see `docs/publishing-pypi.md`).
       arXiv readers follow a link to a moving default branch and then cannot reproduce anything.
 - [ ] Archive the release on Zenodo (free), which mints a DOI. Put the DOI in the report and in
       `docs/CITATION.cff` (`identifiers:` block).
