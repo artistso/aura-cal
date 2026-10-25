@@ -1,6 +1,7 @@
 package com.example.aura.kernel
 
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * Aura Symbolic Algebra, Step-by-Step Equation Solver, and Formal Proof Assistant.
@@ -395,18 +396,29 @@ object SymbolicEngine {
                         val baseTex = Engine.toLatex(currentGraph, base.id, idx)
                         val expTex = Engine.toLatex(currentGraph, exp.id, idx)
                         if (targetVar in Evaluate.collectVariables(idx, base.id)) {
+                            // x^(2k) = c has two real branches; writing only the principal root
+                            // would silently drop one of them.
+                            val degree = Evaluate.evalExpression(idx, exp.id)
+                            val evenDegree = degree != null &&
+                                abs(degree - degree.roundToInt()) < 1e-9 &&
+                                degree.roundToInt() % 2 == 0 && degree >= 2
+                            val sign = if (evenDegree) "\\pm " else ""
                             val nextLatex = if (expTex == "2") {
-                                "$baseTex = \\sqrt{$rhsTex}"
+                                "$baseTex = $sign\\sqrt{$rhsTex}"
                             } else {
-                                "$baseTex = \\sqrt[$expTex]{$rhsTex}"
+                                "$baseTex = $sign\\sqrt[$expTex]{$rhsTex}"
                             }
                             val replaced = replaceClusterWithLatex(currentGraph, currentRootId, nextLatex) ?: break
                             currentGraph = replaced.first
                             currentRootId = replaced.second
                             steps.add(
                                 RewriteStep(
-                                    ruleName = "Principal Root Extraction",
-                                    description = "Take the ${if (expTex == "2") "square" else "${expTex}-th"} root of both sides",
+                                    ruleName = if (evenDegree) "Even Root Extraction" else "Principal Root Extraction",
+                                    description = if (evenDegree) {
+                                        "Take the ${if (expTex == "2") "square" else "${expTex}-th"} root of both sides — an even power has two real roots"
+                                    } else {
+                                        "Take the ${if (expTex == "2") "square" else "${expTex}-th"} root of both sides"
+                                    },
                                     beforeLatex = beforeTex,
                                     afterLatex = Engine.toLatex(currentGraph, currentRootId),
                                     graph = currentGraph,
@@ -443,7 +455,57 @@ object SymbolicEngine {
 
             break
         }
+        collapseSolution(currentGraph, currentRootId, targetVar)?.let { steps.add(it) }
         return steps
+    }
+
+    /**
+     * Once the target variable is isolated, evaluates the right-hand side so the solve ends in
+     * a value (`x = 4`) instead of an unevaluated expression (`x = \frac{11 - 3}{2}`).
+     * A sign-ambiguous (±) result keeps both branches.
+     */
+    private fun collapseSolution(
+        graph: AuraGraph,
+        rootId: String,
+        targetVar: String
+    ): RewriteStep? {
+        val index = Engine.indexGraph(graph)
+        val root = index.byId[rootId] ?: return null
+        if (root.kind != NodeKind.Relation || root.variant != "equal") return null
+        val left = Engine.childOf(index, root.id, PortId.Left) ?: return null
+        val right = Engine.childOf(index, root.id, PortId.Right) ?: return null
+        if (left.kind != NodeKind.Variable || left.token != targetVar) return null
+
+        // `±` is not a value (it denotes a set of values), so an even-root solution cannot be
+        // evaluated as a whole. Evaluate the *operand* and render both branches.
+        val signNode = if (right.variant == "pm" || right.variant == "mp") right else null
+        val signOperand = if (signNode != null) {
+            Engine.childOf(index, signNode.id, PortId.Arg)
+        } else null
+        val value = if (signNode != null) {
+            signOperand?.let { Evaluate.evalExpression(index, it.id) } ?: return null
+        } else {
+            Evaluate.evalExpression(index, right.id) ?: return null
+        }
+        if (!value.isFinite()) return null
+        val signAmbiguous = signNode != null
+        val rendered = Evaluate.formatNumber(if (signAmbiguous) abs(value) else value)
+        val target = if (signAmbiguous) "$targetVar = \\pm $rendered" else "$targetVar = $rendered"
+        val beforeTex = Engine.toLatex(graph, root.id, index)
+        if (target.replace(" ", "") == beforeTex.replace(" ", "")) return null
+        val replaced = replaceClusterWithLatex(graph, rootId, target) ?: return null
+        return RewriteStep(
+            ruleName = "Evaluate Solution",
+            description = if (signAmbiguous) {
+                "Evaluated both real roots to ±$rendered"
+            } else {
+                "Evaluated the isolated expression to $rendered"
+            },
+            beforeLatex = beforeTex,
+            afterLatex = Engine.toLatex(replaced.first, replaced.second),
+            graph = replaced.first,
+            focusRootId = replaced.second
+        )
     }
 
     /**

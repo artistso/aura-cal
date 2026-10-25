@@ -1,0 +1,138 @@
+{
+  "agf": "0.1",
+  "note": "Hand-authored malformed documents, one per well-formedness rule (SPEC §5). Each case lists the codes that MUST be reported; extra diagnostics are permitted, because a single defect can legitimately violate more than one rule.",
+  "cases": [
+    {
+      "name": "dangling_edge",
+      "why": "W1 — an edge names a vertex that does not exist",
+      "expected_codes": ["W1"],
+      "expected_errors": 1,
+      "graph": {
+        "nodes": [
+          { "id": "x", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x" }
+        ],
+        "edges": [
+          { "id": "e1", "source": "x", "port": "exponent", "target": "ghost" }
+        ]
+      }
+    },
+    {
+      "name": "duplicate_port",
+      "why": "W2 — one port bound twice",
+      "expected_codes": ["W2"],
+      "graph": {
+        "nodes": [
+          { "id": "x", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x" },
+          { "id": "one", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1" },
+          { "id": "two", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2" }
+        ],
+        "edges": [
+          { "id": "e1", "source": "x", "port": "exponent", "target": "one" },
+          { "id": "e2", "source": "x", "port": "exponent", "target": "two" }
+        ]
+      }
+    },
+    {
+      "name": "shared_operator",
+      "why": "W3 — an operator used as a child twice (only literals, variables and sets are shareable)",
+      "expected_codes": ["W3"],
+      "expected_errors": 1,
+      "graph": {
+        "nodes": [
+          { "id": "add", "kind": "operator", "type": "Operator", "variant": "add", "token": "+", "label": "Addition" },
+          { "id": "x", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x" },
+          { "id": "y", "kind": "variable", "type": "Variable", "token": "y", "label": "Variable y" },
+          { "id": "eq1", "kind": "relation", "type": "Relation", "variant": "equal", "token": "=", "label": "Equality" },
+          { "id": "eq2", "kind": "relation", "type": "Relation", "variant": "equal", "token": "=", "label": "Equality" }
+        ],
+        "edges": [
+          { "id": "e1", "source": "add", "port": "left", "target": "x" },
+          { "id": "e2", "source": "add", "port": "right", "target": "y" },
+          { "id": "e3", "source": "eq1", "port": "left", "target": "add" },
+          { "id": "e4", "source": "eq2", "port": "left", "target": "add" }
+        ]
+      }
+    },
+    {
+      "name": "cycle",
+      "why": "W4 — a.exponent = b and b.exponent = a",
+      "expected_codes": ["W4"],
+      "graph": {
+        "nodes": [
+          { "id": "a", "kind": "variable", "type": "Variable", "token": "a", "label": "Variable a" },
+          { "id": "b", "kind": "variable", "type": "Variable", "token": "b", "label": "Variable b" }
+        ],
+        "edges": [
+          { "id": "e1", "source": "a", "port": "exponent", "target": "b" },
+          { "id": "e2", "source": "b", "port": "exponent", "target": "a" }
+        ]
+      }
+    },
+    {
+      "name": "undeclared_port",
+      "why": "W5 — a fraction has numerator/denominator, not left",
+      "expected_codes": ["W5"],
+      "expected_errors": 1,
+      "graph": {
+        "nodes": [
+          { "id": "frac", "kind": "operator", "type": "Operator", "variant": "frac", "token": "\\frac", "label": "Fraction" },
+          { "id": "x", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x" }
+        ],
+        "edges": [
+          { "id": "e1", "source": "frac", "port": "left", "target": "x" }
+        ]
+      }
+    },
+    {
+      "name": "relation_in_exponent",
+      "why": "W6 and W7 — a relation cannot be raised to a power",
+      "expected_codes": ["W6", "W7"],
+      "graph": {
+        "nodes": [
+          { "id": "pow", "kind": "operator", "type": "Operator", "variant": "power", "token": "^", "label": "Power" },
+          { "id": "x", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x" },
+          { "id": "eq", "kind": "relation", "type": "Relation", "variant": "equal", "token": "=", "label": "Equality" },
+          { "id": "one", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1" }
+        ],
+        "edges": [
+          { "id": "e1", "source": "pow", "port": "base", "target": "x" },
+          { "id": "e2", "source": "pow", "port": "exponent", "target": "eq" },
+          { "id": "e3", "source": "eq", "port": "left", "target": "x" },
+          { "id": "e4", "source": "eq", "port": "right", "target": "one" }
+        ]
+      }
+    },
+    {
+      "name": "incomplete_fraction",
+      "why": "W8 — the denominator is missing; this is a warning, not an error",
+      "expected_codes": ["W8"],
+      "expected_errors": 0,
+      "graph": {
+        "nodes": [
+          { "id": "frac", "kind": "operator", "type": "Operator", "variant": "frac", "token": "\\frac", "label": "Fraction" },
+          { "id": "x", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x" }
+        ],
+        "edges": [
+          { "id": "e1", "source": "frac", "port": "numerator", "target": "x" }
+        ]
+      }
+    },
+    {
+      "name": "well_formed",
+      "why": "control case — must report nothing",
+      "expected_codes": [],
+      "expected_errors": 0,
+      "graph": {
+        "nodes": [
+          { "id": "add", "kind": "operator", "type": "Operator", "variant": "add", "token": "+", "label": "Addition" },
+          { "id": "x", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x" },
+          { "id": "one", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1" }
+        ],
+        "edges": [
+          { "id": "e1", "source": "add", "port": "left", "target": "x" },
+          { "id": "e2", "source": "add", "port": "right", "target": "one" }
+        ]
+      }
+    }
+  ]
+}

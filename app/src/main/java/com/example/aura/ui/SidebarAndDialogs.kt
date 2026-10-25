@@ -556,9 +556,9 @@ fun InkDialog(
         try {
             parsedPreview = LatexParser.parseLatex(latexInput)
             parseError = null
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             parsedPreview = null
-            parseError = e.message
+            parseError = e.message ?: "This expression could not be parsed."
         }
     }
 

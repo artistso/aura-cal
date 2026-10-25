@@ -10,7 +10,7 @@ import kotlin.math.min
 class ParseError(message: String) : Exception(message)
 
 enum class TokenType {
-    Num, Ident, Cmd, Op, Rel, LParen, RParen, LBrace, RBrace, Caret, Underscore, LBracket, RBracket, Comma, Eof
+    Num, Ident, Cmd, Op, Rel, LParen, RParen, LBrace, RBrace, Caret, Underscore, LBracket, RBracket, Comma, Bar, Eof
 }
 
 data class LatexToken(val type: TokenType, val value: String)
@@ -72,6 +72,19 @@ object LatexParser {
 
     private val IGNORED = setOf("left", "right", "displaystyle", "limits", "!", " ", ",")
 
+    /** Upper bound on input size; beyond this the canvas is unusable and recursion would be unsafe. */
+    const val MAX_TOKENS = 2048
+
+    /** Maximum grouping depth (`(((( ... ))))`) before the parser refuses the input. */
+    const val MAX_DEPTH = 96
+
+    /**
+     * Maximum depth of the produced expression tree. Every downstream consumer (LaTeX
+     * rendering, numeric evaluation, type inference) walks the tree recursively, so an
+     * unbounded chain of operators would overflow the stack inside the app.
+     */
+    const val MAX_TREE_DEPTH = 192
+
     fun tokenizeLatex(source: String): List<LatexToken> {
         val tokens = ArrayList<LatexToken>()
         val input = source.replace(Regex("\\s+"), " ").trim()
@@ -102,8 +115,37 @@ object LatexParser {
                 if (name.isEmpty()) {
                     val nextChar = input.getOrNull(i)?.toString() ?: ""
                     i++
+                    if (nextChar == "|") {
+                        tokens.add(LatexToken(TokenType.Bar, "\\|"))
+                        continue
+                    }
                     if (nextChar in IGNORED) continue
                     tokens.add(LatexToken(TokenType.Cmd, "\\$nextChar"))
+                    continue
+                }
+                if (name in listOf("vert", "lvert", "rvert")) {
+                    tokens.add(LatexToken(TokenType.Bar, "|"))
+                    continue
+                }
+                if (name in listOf("Vert", "lVert", "rVert")) {
+                    tokens.add(LatexToken(TokenType.Bar, "\\|"))
+                    continue
+                }
+                if (name == "mathrm") {
+                    // \mathrm{d} is the conventional differential; keep the inner symbol.
+                    if (input.getOrNull(i) == '{') {
+                        val end = input.indexOf('}', i)
+                        if (end == -1) throw ParseError("Unclosed \\mathrm{...}")
+                        val inner = input.substring(i + 1, end)
+                        i = end + 1
+                        if (inner.length == 1 && inner[0].isLetter()) {
+                            tokens.add(LatexToken(TokenType.Ident, inner))
+                        } else {
+                            tokens.add(LatexToken(TokenType.Cmd, "\\mathrm{$inner}"))
+                        }
+                    } else {
+                        tokens.add(LatexToken(TokenType.Cmd, "\\mathrm"))
+                    }
                     continue
                 }
                 if (name in listOf("mathbb", "mathbf", "mathcal", "operatorname")) {
@@ -169,6 +211,7 @@ object LatexParser {
                 ',' -> tokens.add(LatexToken(TokenType.Comma, ","))
                 '[' -> tokens.add(LatexToken(TokenType.LBracket, "["))
                 ']' -> tokens.add(LatexToken(TokenType.RBracket, "]"))
+                '|' -> tokens.add(LatexToken(TokenType.Bar, "|"))
                 '!', '/' -> tokens.add(LatexToken(TokenType.Op, ch.toString()))
                 else -> {
                     val s = ch.toString()
@@ -180,6 +223,9 @@ object LatexParser {
                 }
             }
             i++
+        }
+        if (tokens.size > MAX_TOKENS) {
+            throw ParseError("Expression is too large (${tokens.size} tokens, limit $MAX_TOKENS). Split it into smaller clusters.")
         }
         tokens.add(LatexToken(TokenType.Eof, ""))
         return tokens
@@ -224,6 +270,11 @@ object LatexParser {
             )
         }
 
+        /** Drops stale shared-leaf references so a pruned vertex cannot be re-bound. */
+        fun forget(nodeIds: Set<String>) {
+            sharedLeaves.entries.removeAll { it.value.id in nodeIds }
+        }
+
         fun build(): AuraGraph = AuraGraph(nodes, edges)
     }
 
@@ -231,10 +282,63 @@ object LatexParser {
         private var position = 0
         private val builder = GraphBuilder()
         private val pendingFunctionArgs = ArrayList<AuraNode>()
+        // Depth of `| ... |` enclosures being read; a bar at depth > 0 closes the enclosure
+        // instead of starting a new (implicitly multiplied) operand.
+        private var barDepth = 0
+        private var depth = 0
 
         fun parse(): Pair<AuraGraph, String?> {
             val root = parseRelation()
+            if (peek().type != TokenType.Eof) {
+                val leftover = tokens.drop(position)
+                    .takeWhile { it.type != TokenType.Eof }
+                    .joinToString("") { it.value }
+                throw ParseError("Unexpected \"$leftover\" — the expression could not be read to the end.")
+            }
+            pruneUnreachable(root?.id)
+            assertDepth(root?.id)
             return builder.build() to root?.id
+        }
+
+        /** Rejects trees deeper than [MAX_TREE_DEPTH] using an explicit stack (no recursion). */
+        private fun assertDepth(rootId: String?) {
+            rootId ?: return
+            val index = Engine.indexGraph(builder.build())
+            val stack = ArrayDeque<Pair<String, Int>>()
+            stack.addLast(rootId to 1)
+            val seen = HashMap<String, Int>()
+            while (stack.isNotEmpty()) {
+                val (id, depth) = stack.removeLast()
+                if (depth > MAX_TREE_DEPTH) {
+                    throw ParseError("Expression is nested more than $MAX_TREE_DEPTH levels deep. Split it into smaller clusters.")
+                }
+                if ((seen[id] ?: 0) >= depth) continue
+                seen[id] = depth
+                index.children[id]?.values?.forEach { stack.addLast(it.target to depth + 1) }
+            }
+        }
+
+        /**
+         * Removes vertices that no longer hang off the root. Structural recovery sometimes
+         * detaches subtrees (for example the differential of an integral); leaving them in
+         * would surface them as stray tiles on the canvas.
+         */
+        private fun pruneUnreachable(rootId: String?) {
+            if (rootId == null) return
+            val index = Engine.indexGraph(builder.build())
+            val keep = HashSet<String>()
+            val stack = ArrayDeque<String>()
+            stack.addLast(rootId)
+            while (stack.isNotEmpty()) {
+                val id = stack.removeLast()
+                if (!keep.add(id)) continue
+                index.children[id]?.values?.forEach { stack.addLast(it.target) }
+            }
+            val removed = builder.nodes.map { it.id }.filter { it !in keep }.toSet()
+            if (removed.isEmpty()) return
+            builder.nodes.removeAll { it.id in removed }
+            builder.edges.removeAll { it.source in removed || it.target in removed }
+            builder.forget(removed)
         }
 
         private fun peek(offset: Int = 0): LatexToken =
@@ -273,7 +377,8 @@ object LatexParser {
 
         private fun startsPrimary(token: LatexToken): Boolean {
             if (token.type == TokenType.Num || token.type == TokenType.Ident ||
-                token.type == TokenType.LParen || token.type == TokenType.LBrace
+                token.type == TokenType.LParen || token.type == TokenType.LBrace ||
+                token.type == TokenType.Bar
             ) return true
             if (token.type == TokenType.Cmd) {
                 return token.value.startsWith("\\")
@@ -281,7 +386,37 @@ object LatexParser {
             return false
         }
 
+        /**
+         * Parses the operand of a script or a limit.
+         *
+         * LaTeX grammar: an unbraced argument is exactly one atom (`x^2`, `x^ab`, `\int_0^1`),
+         * while a braced argument may contain a full relation (`x^{2n+1}`, `\sum_{n=1}^{10}`).
+         * Reading a whole relation for the unbraced form is what previously turned
+         * `a^2 + b^2 = c^2` into `a^(2 + b^(2 = c^2))`.
+         */
+        private fun argument(atom: () -> AuraNode?, expression: () -> AuraNode?): AuraNode? {
+            return if (peek().type == TokenType.LBrace) {
+                next()
+                val node = expression()
+                expect(TokenType.RBrace, "}")
+                node
+            } else {
+                atom()
+            }
+        }
+
         private fun parseRelation(): AuraNode? {
+            if (++depth > MAX_DEPTH) {
+                throw ParseError("Expression is nested too deeply (limit $MAX_DEPTH levels).")
+            }
+            try {
+                return parseRelationBody()
+            } finally {
+                depth--
+            }
+        }
+
+        private fun parseRelationBody(): AuraNode? {
             var left = parseAdditive()
             while (peek().type == TokenType.Rel && left != null) {
                 val spec = RELATION_COMMANDS[next().value] ?: continue
@@ -354,6 +489,7 @@ object LatexParser {
                     continue
                 }
                 if (startsPrimary(token) && left != null) {
+                    if (token.type == TokenType.Bar && barDepth > 0) break
                     val right = parsePower()
                     val op = builder.add(
                         kind = NodeKind.Operator,
@@ -384,9 +520,9 @@ object LatexParser {
 
         private fun parsePower(): AuraNode? {
             var base = parsePostfix()
-            if (peek().type == TokenType.Caret && base != null) {
+            while (peek().type == TokenType.Caret && base != null) {
                 next()
-                val exponent = braced { parseRelation() } ?: parsePostfix()
+                val exponent = argument(atom = { parsePostfix() }, expression = { parseRelation() })
                 val power = builder.add(
                     kind = NodeKind.Operator,
                     token = "^",
@@ -418,12 +554,88 @@ object LatexParser {
             }
             while (base != null && peek().type == TokenType.Underscore) {
                 next()
-                val idx = braced { parsePrimary() } ?: parsePrimary()
+                val idx = argument(atom = { parsePrimary() }, expression = { parseRelation() })
                 if (base.kind in listOf(NodeKind.Literal, NodeKind.Variable, NodeKind.Set, NodeKind.Group)) {
                     builder.bind(base, PortId.Subscript, idx)
                 }
             }
             return base
+        }
+
+        /**
+         * Drops the trailing differential of an integrand: `x^2 \, dx` becomes `x^2`,
+         * so the integral body is the integrand rather than the product `x²·d·x`.
+         * The orphaned `d`/variable vertices are removed by [pruneUnreachable].
+         */
+        private fun stripDifferential(body: AuraNode?): AuraNode? {
+            body ?: return null
+            val index = Engine.indexGraph(builder.build())
+            val factors = ArrayList<AuraNode>()
+            fun flatten(node: AuraNode) {
+                val isJuxta = node.kind == NodeKind.Operator && node.variant == "juxta"
+                val left = if (isJuxta) Engine.childOf(index, node.id, PortId.Left) else null
+                val right = if (isJuxta) Engine.childOf(index, node.id, PortId.Right) else null
+                if (left != null && right != null) {
+                    flatten(left)
+                    flatten(right)
+                } else {
+                    factors.add(node)
+                }
+            }
+            flatten(body)
+            if (factors.size < 2) return body
+            val differential = factors[factors.size - 2]
+            val variable = factors[factors.size - 1]
+            val isDifferential = differential.kind == NodeKind.Variable && differential.token == "d" &&
+                variable.kind == NodeKind.Variable
+            if (!isDifferential) return body
+            val remaining = factors.dropLast(2)
+            if (remaining.isEmpty()) return null
+            var acc = remaining.first()
+            for (i in 1 until remaining.size) {
+                val juxta = builder.add(
+                    kind = NodeKind.Operator,
+                    token = "\\,",
+                    label = "Juxtaposition",
+                    type = MathType.Operator,
+                    variant = "juxta",
+                    shareVariable = false
+                )
+                builder.bind(juxta, PortId.Left, acc)
+                builder.bind(juxta, PortId.Right, remaining[i])
+                acc = juxta
+            }
+            return acc
+        }
+
+        /**
+         * Parses a parenthesised argument list. Multi-argument functions (`\gcd(6, 4)`) keep
+         * every argument as a juxtaposed operand instead of silently discarding the tail.
+         */
+        private fun parseParenthesisedArguments(): AuraNode? {
+            val args = ArrayList<AuraNode>()
+            while (peek().type != TokenType.RParen && peek().type != TokenType.Eof) {
+                val arg = parseRelation() ?: break
+                args.add(arg)
+                if (peek().type == TokenType.Comma) next() else break
+            }
+            accept(TokenType.RParen)
+            if (args.isEmpty()) return null
+            var acc = args.first()
+            for (i in 1 until args.size) {
+                val juxta = builder.add(
+                    kind = NodeKind.Operator,
+                    token = "\\,",
+                    label = "Juxtaposition",
+                    type = MathType.Operator,
+                    variant = "juxta",
+                    shareVariable = false
+                )
+                builder.bind(juxta, PortId.Left, acc)
+                builder.bind(juxta, PortId.Right, args[i])
+                acc = juxta
+            }
+            return acc
         }
 
         private fun fromLibrary(entry: SymbolEntry): AuraNode {
@@ -441,7 +653,7 @@ object LatexParser {
                 for (marker in listOf(TokenType.Underscore, TokenType.Caret)) {
                     if (peek().type == marker) {
                         next()
-                        val bound = braced { parseRelation() }
+                        val bound = argument(atom = { parsePrimary() }, expression = { parseRelation() })
                         builder.bind(bigNode, if (marker == TokenType.Underscore) PortId.Lower else PortId.Upper, bound)
                     }
                 }
@@ -462,14 +674,13 @@ object LatexParser {
                 var exponent: AuraNode? = null
                 if (peek().type == TokenType.Caret) {
                     next()
-                    exponent = braced { parsePrimary() } ?: parsePrimary()
+                    exponent = argument(atom = { parsePrimary() }, expression = { parseRelation() })
                 }
                 var arg: AuraNode? = null
                 when {
                     peek().type == TokenType.LParen -> {
                         next()
-                        arg = parseRelation()
-                        accept(TokenType.RParen)
+                        arg = parseParenthesisedArguments()
                     }
                     peek().type == TokenType.LBrace -> {
                         arg = braced { parseRelation() }
@@ -513,7 +724,7 @@ object LatexParser {
                 for (marker in listOf(TokenType.Underscore, TokenType.Caret)) {
                     if (peek().type == marker) {
                         next()
-                        val bound = braced { parseRelation() } ?: parsePrimary()
+                        val bound = argument(atom = { parsePrimary() }, expression = { parseRelation() })
                         builder.bind(node, if (marker == TokenType.Underscore) PortId.Lower else PortId.Upper, bound)
                     }
                 }
@@ -573,6 +784,27 @@ object LatexParser {
                 val inner = parseRelation()
                 expect(TokenType.RBrace, "}")
                 return inner
+            }
+            if (token.type == TokenType.Bar) {
+                next()
+                val norm = token.value == "\\|"
+                barDepth++
+                val inner = parseAdditive()
+                barDepth--
+                if (peek().type != TokenType.Bar) {
+                    throw ParseError("Unclosed ${if (norm) "norm" else "absolute value"} — expected a matching \"|\".")
+                }
+                next()
+                val enclosure = builder.add(
+                    kind = NodeKind.Container,
+                    token = if (norm) "\\left\\|\\cdot\\right\\|" else "\\left|\\cdot\\right|",
+                    label = if (norm) "Norm" else "Absolute value",
+                    type = MathType.Expression,
+                    variant = if (norm) "norm" else "abs",
+                    shareVariable = false
+                )
+                builder.bind(enclosure, PortId.Body, inner)
+                return enclosure
             }
             if (token.type == TokenType.Ident) {
                 next()
@@ -646,11 +878,12 @@ object LatexParser {
                     for (marker in listOf(TokenType.Underscore, TokenType.Caret)) {
                         if (peek().type == marker) {
                             next()
-                            val bound = braced { parseRelation() } ?: parsePrimary()
+                            val bound = argument(atom = { parsePrimary() }, expression = { parseRelation() })
                             builder.bind(container, if (marker == TokenType.Underscore) PortId.Lower else PortId.Upper, bound)
                         }
                     }
-                    val body = parseMultiplicative()
+                    val rawBody = parseMultiplicative()
+                    val body = if (command == "\\int") stripDifferential(rawBody) else rawBody
                     builder.bind(container, PortId.Body, body)
                     return container
                 }
@@ -666,14 +899,13 @@ object LatexParser {
                     var exponent: AuraNode? = null
                     if (peek().type == TokenType.Caret) {
                         next()
-                        exponent = braced { parsePrimary() } ?: parsePrimary()
+                        exponent = argument(atom = { parsePrimary() }, expression = { parseRelation() })
                     }
                     var arg: AuraNode? = null
                     when {
                         peek().type == TokenType.LParen -> {
                             next()
-                            arg = parseRelation()
-                            accept(TokenType.RParen)
+                            arg = parseParenthesisedArguments()
                         }
                         peek().type == TokenType.LBrace -> {
                             arg = braced { parseRelation() }

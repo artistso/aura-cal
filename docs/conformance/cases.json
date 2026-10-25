@@ -1,0 +1,306 @@
+{
+  "agf": "0.1",
+  "generated_by": "tools/GenerateConformance.kt (reference Kotlin implementation)",
+  "cases": [
+    {
+      "name": "case_0",
+      "source": "a^2 + b^2 = c^2",
+      "root": "n10",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "a", "label": "Variable a"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n3", "kind": "variable", "type": "Variable", "token": "b", "label": "Variable b"}, {"id": "n4", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n5", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n6", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n7", "kind": "variable", "type": "Variable", "token": "c", "label": "Variable c"}, {"id": "n8", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n9", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n10", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n2", "port": "base", "target": "n0", "role": "base"}, {"id": "e1", "source": "n2", "port": "exponent", "target": "n1", "role": "exponent"}, {"id": "e2", "source": "n5", "port": "base", "target": "n3", "role": "base"}, {"id": "e3", "source": "n5", "port": "exponent", "target": "n4", "role": "exponent"}, {"id": "e4", "source": "n6", "port": "left", "target": "n2", "role": "left"}, {"id": "e5", "source": "n6", "port": "right", "target": "n5", "role": "right"}, {"id": "e6", "source": "n9", "port": "base", "target": "n7", "role": "base"}, {"id": "e7", "source": "n9", "port": "exponent", "target": "n8", "role": "exponent"}, {"id": "e8", "source": "n10", "port": "left", "target": "n6", "role": "left"}, {"id": "e9", "source": "n10", "port": "right", "target": "n9", "role": "right"}]},
+      "types": {"n0": "Variable", "n1": "Scalar", "n2": "Scalar", "n3": "Variable", "n4": "Scalar", "n5": "Scalar", "n6": "Scalar", "n7": "Variable", "n8": "Scalar", "n9": "Scalar", "n10": "Relation"},
+      "value": null,
+      "latex": "{a}^{2} + {b}^{2} = {c}^{2}",
+      "error_count": 0
+    },
+    {
+      "name": "case_1",
+      "source": "\\frac{6+2}{4}",
+      "root": "n4",
+      "graph": {"nodes": [{"id": "n0", "kind": "literal", "type": "Scalar", "token": "6", "label": "Literal 6"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n3", "kind": "literal", "type": "Scalar", "token": "4", "label": "Literal 4"}, {"id": "n4", "kind": "operator", "type": "Operator", "token": "\\frac", "label": "Fraction", "variant": "frac"}], "edges": [{"id": "e0", "source": "n2", "port": "left", "target": "n0", "role": "left"}, {"id": "e1", "source": "n2", "port": "right", "target": "n1", "role": "right"}, {"id": "e2", "source": "n4", "port": "numerator", "target": "n2", "role": "numerator"}, {"id": "e3", "source": "n4", "port": "denominator", "target": "n3", "role": "denominator"}]},
+      "types": {"n0": "Scalar", "n1": "Scalar", "n2": "Scalar", "n3": "Scalar", "n4": "Scalar"},
+      "value": 2.0,
+      "latex": "\\frac{6 + 2}{4}",
+      "error_count": 0
+    },
+    {
+      "name": "case_2",
+      "source": "2 + 3 \\times 4",
+      "root": "n4",
+      "graph": {"nodes": [{"id": "n0", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "3", "label": "Literal 3"}, {"id": "n2", "kind": "literal", "type": "Scalar", "token": "4", "label": "Literal 4"}, {"id": "n3", "kind": "operator", "type": "Operator", "token": "\\times", "label": "Product", "variant": "mul"}, {"id": "n4", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}], "edges": [{"id": "e0", "source": "n3", "port": "left", "target": "n1", "role": "left"}, {"id": "e1", "source": "n3", "port": "right", "target": "n2", "role": "right"}, {"id": "e2", "source": "n4", "port": "left", "target": "n0", "role": "left"}, {"id": "e3", "source": "n4", "port": "right", "target": "n3", "role": "right"}]},
+      "types": {"n0": "Scalar", "n1": "Scalar", "n2": "Scalar", "n3": "Scalar", "n4": "Scalar"},
+      "value": 14.0,
+      "latex": "2 + 3 \\times 4",
+      "error_count": 0
+    },
+    {
+      "name": "case_3",
+      "source": "E = mc^2",
+      "root": "n6",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "E", "label": "Variable E"}, {"id": "n1", "kind": "variable", "type": "Variable", "token": "m", "label": "Variable m"}, {"id": "n2", "kind": "variable", "type": "Variable", "token": "c", "label": "Variable c"}, {"id": "n3", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n4", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n5", "kind": "operator", "type": "Operator", "token": "\\,", "label": "Juxtaposition", "variant": "juxta"}, {"id": "n6", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n4", "port": "base", "target": "n2", "role": "base"}, {"id": "e1", "source": "n4", "port": "exponent", "target": "n3", "role": "exponent"}, {"id": "e2", "source": "n5", "port": "left", "target": "n1", "role": "left"}, {"id": "e3", "source": "n5", "port": "right", "target": "n4", "role": "right"}, {"id": "e4", "source": "n6", "port": "left", "target": "n0", "role": "left"}, {"id": "e5", "source": "n6", "port": "right", "target": "n5", "role": "right"}]},
+      "types": {"n0": "Variable", "n1": "Variable", "n2": "Variable", "n3": "Scalar", "n4": "Scalar", "n5": "Scalar", "n6": "Relation"},
+      "value": null,
+      "latex": "E = m\\,{c}^{2}",
+      "error_count": 0
+    },
+    {
+      "name": "case_4",
+      "source": "\\sin^2\\theta + \\cos^2\\theta = 1",
+      "root": "n9",
+      "graph": {"nodes": [{"id": "n0", "kind": "function", "type": "Function", "token": "\\sin", "label": "sin", "variant": "sin"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n2", "kind": "variable", "type": "Variable", "token": "\\theta", "label": "theta"}, {"id": "n3", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n4", "kind": "function", "type": "Function", "token": "\\cos", "label": "cos", "variant": "cos"}, {"id": "n5", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n6", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n7", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n8", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1"}, {"id": "n9", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n0", "port": "arg", "target": "n2", "role": "arg"}, {"id": "e1", "source": "n3", "port": "base", "target": "n0", "role": "base"}, {"id": "e2", "source": "n3", "port": "exponent", "target": "n1", "role": "exponent"}, {"id": "e3", "source": "n4", "port": "arg", "target": "n2", "role": "arg"}, {"id": "e4", "source": "n6", "port": "base", "target": "n4", "role": "base"}, {"id": "e5", "source": "n6", "port": "exponent", "target": "n5", "role": "exponent"}, {"id": "e6", "source": "n7", "port": "left", "target": "n3", "role": "left"}, {"id": "e7", "source": "n7", "port": "right", "target": "n6", "role": "right"}, {"id": "e8", "source": "n9", "port": "left", "target": "n7", "role": "left"}, {"id": "e9", "source": "n9", "port": "right", "target": "n8", "role": "right"}]},
+      "types": {"n0": "Expression", "n1": "Scalar", "n2": "Variable", "n3": "Expression", "n4": "Expression", "n5": "Scalar", "n6": "Expression", "n7": "Expression", "n8": "Scalar", "n9": "Relation"},
+      "value": null,
+      "latex": "{\\sin\\left(\\theta\\right)}^{2} + {\\cos\\left(\\theta\\right)}^{2} = 1",
+      "error_count": 0
+    },
+    {
+      "name": "case_5",
+      "source": "\\sqrt{x^2 + 1}",
+      "root": "n5",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n3", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1"}, {"id": "n4", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n5", "kind": "container", "type": "Expression", "token": "\\sqrt{\\phantom{x}}", "label": "Square root", "variant": "sqrt"}], "edges": [{"id": "e0", "source": "n2", "port": "base", "target": "n0", "role": "base"}, {"id": "e1", "source": "n2", "port": "exponent", "target": "n1", "role": "exponent"}, {"id": "e2", "source": "n4", "port": "left", "target": "n2", "role": "left"}, {"id": "e3", "source": "n4", "port": "right", "target": "n3", "role": "right"}, {"id": "e4", "source": "n5", "port": "body", "target": "n4", "role": "body"}]},
+      "types": {"n0": "Variable", "n1": "Scalar", "n2": "Scalar", "n3": "Scalar", "n4": "Scalar", "n5": "Expression"},
+      "value": null,
+      "latex": "\\sqrt{{x}^{2} + 1}",
+      "error_count": 0
+    },
+    {
+      "name": "case_6",
+      "source": "2x + 3 = 11",
+      "root": "n6",
+      "graph": {"nodes": [{"id": "n0", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n1", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "\\,", "label": "Juxtaposition", "variant": "juxta"}, {"id": "n3", "kind": "literal", "type": "Scalar", "token": "3", "label": "Literal 3"}, {"id": "n4", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n5", "kind": "literal", "type": "Scalar", "token": "11", "label": "Literal 11"}, {"id": "n6", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n2", "port": "left", "target": "n0", "role": "left"}, {"id": "e1", "source": "n2", "port": "right", "target": "n1", "role": "right"}, {"id": "e2", "source": "n4", "port": "left", "target": "n2", "role": "left"}, {"id": "e3", "source": "n4", "port": "right", "target": "n3", "role": "right"}, {"id": "e4", "source": "n6", "port": "left", "target": "n4", "role": "left"}, {"id": "e5", "source": "n6", "port": "right", "target": "n5", "role": "right"}]},
+      "types": {"n0": "Scalar", "n1": "Variable", "n2": "Scalar", "n3": "Scalar", "n4": "Scalar", "n5": "Scalar", "n6": "Relation"},
+      "value": null,
+      "latex": "2\\,x + 3 = 11",
+      "error_count": 0
+    },
+    {
+      "name": "case_7",
+      "source": "x^2 = 9",
+      "root": "n4",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n3", "kind": "literal", "type": "Scalar", "token": "9", "label": "Literal 9"}, {"id": "n4", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n2", "port": "base", "target": "n0", "role": "base"}, {"id": "e1", "source": "n2", "port": "exponent", "target": "n1", "role": "exponent"}, {"id": "e2", "source": "n4", "port": "left", "target": "n2", "role": "left"}, {"id": "e3", "source": "n4", "port": "right", "target": "n3", "role": "right"}]},
+      "types": {"n0": "Variable", "n1": "Scalar", "n2": "Scalar", "n3": "Scalar", "n4": "Relation"},
+      "value": null,
+      "latex": "{x}^{2} = 9",
+      "error_count": 0
+    },
+    {
+      "name": "case_8",
+      "source": "\\int_0^1 x^2 \\, dx",
+      "root": "n0",
+      "graph": {"nodes": [{"id": "n0", "kind": "container", "type": "Expression", "token": "\\int", "label": "Integral", "variant": "int"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "0", "label": "Literal 0"}, {"id": "n2", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1"}, {"id": "n3", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n4", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n5", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}], "edges": [{"id": "e0", "source": "n0", "port": "lower", "target": "n1", "role": "lower"}, {"id": "e1", "source": "n0", "port": "upper", "target": "n2", "role": "upper"}, {"id": "e2", "source": "n5", "port": "base", "target": "n3", "role": "base"}, {"id": "e3", "source": "n5", "port": "exponent", "target": "n4", "role": "exponent"}, {"id": "e4", "source": "n0", "port": "body", "target": "n5", "role": "body"}]},
+      "types": {"n0": "Expression", "n1": "Scalar", "n2": "Scalar", "n3": "Variable", "n4": "Scalar", "n5": "Scalar"},
+      "value": null,
+      "latex": "\\int_{0}^{1} {x}^{2}",
+      "error_count": 0
+    },
+    {
+      "name": "case_9",
+      "source": "\\sum_{n=1}^{10} n",
+      "root": "n0",
+      "graph": {"nodes": [{"id": "n0", "kind": "container", "type": "Expression", "token": "\\sum", "label": "Summation", "variant": "sum"}, {"id": "n1", "kind": "variable", "type": "Variable", "token": "n", "label": "Variable n"}, {"id": "n2", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1"}, {"id": "n3", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}, {"id": "n4", "kind": "literal", "type": "Scalar", "token": "10", "label": "Literal 10"}], "edges": [{"id": "e0", "source": "n3", "port": "left", "target": "n1", "role": "left"}, {"id": "e1", "source": "n3", "port": "right", "target": "n2", "role": "right"}, {"id": "e2", "source": "n0", "port": "lower", "target": "n3", "role": "lower"}, {"id": "e3", "source": "n0", "port": "upper", "target": "n4", "role": "upper"}, {"id": "e4", "source": "n0", "port": "body", "target": "n1", "role": "body"}]},
+      "types": {"n0": "Expression", "n1": "Variable", "n2": "Scalar", "n3": "Relation", "n4": "Scalar"},
+      "value": 55.0,
+      "latex": "\\sum_{n = 1}^{10} n",
+      "error_count": 0
+    },
+    {
+      "name": "case_10",
+      "source": "|x - 3| = 4",
+      "root": "n5",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "3", "label": "Literal 3"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "-", "label": "Subtraction", "variant": "sub"}, {"id": "n3", "kind": "container", "type": "Expression", "token": "\\left|\\cdot\\right|", "label": "Absolute value", "variant": "abs"}, {"id": "n4", "kind": "literal", "type": "Scalar", "token": "4", "label": "Literal 4"}, {"id": "n5", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n2", "port": "left", "target": "n0", "role": "left"}, {"id": "e1", "source": "n2", "port": "right", "target": "n1", "role": "right"}, {"id": "e2", "source": "n3", "port": "body", "target": "n2", "role": "body"}, {"id": "e3", "source": "n5", "port": "left", "target": "n3", "role": "left"}, {"id": "e4", "source": "n5", "port": "right", "target": "n4", "role": "right"}]},
+      "types": {"n0": "Variable", "n1": "Scalar", "n2": "Scalar", "n3": "Scalar", "n4": "Scalar", "n5": "Relation"},
+      "value": null,
+      "latex": "\\left|x - 3\\right| = 4",
+      "error_count": 0
+    },
+    {
+      "name": "case_11",
+      "source": "\\frac{a}{b} = c",
+      "root": "n4",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "a", "label": "Variable a"}, {"id": "n1", "kind": "variable", "type": "Variable", "token": "b", "label": "Variable b"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "\\frac", "label": "Fraction", "variant": "frac"}, {"id": "n3", "kind": "variable", "type": "Variable", "token": "c", "label": "Variable c"}, {"id": "n4", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n2", "port": "numerator", "target": "n0", "role": "numerator"}, {"id": "e1", "source": "n2", "port": "denominator", "target": "n1", "role": "denominator"}, {"id": "e2", "source": "n4", "port": "left", "target": "n2", "role": "left"}, {"id": "e3", "source": "n4", "port": "right", "target": "n3", "role": "right"}]},
+      "types": {"n0": "Variable", "n1": "Variable", "n2": "Scalar", "n3": "Variable", "n4": "Relation"},
+      "value": null,
+      "latex": "\\frac{a}{b} = c",
+      "error_count": 0
+    },
+    {
+      "name": "case_12",
+      "source": "3(x + 2) = 15",
+      "root": "n6",
+      "graph": {"nodes": [{"id": "n0", "kind": "literal", "type": "Scalar", "token": "3", "label": "Literal 3"}, {"id": "n1", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n2", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n3", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n4", "kind": "operator", "type": "Operator", "token": "\\,", "label": "Juxtaposition", "variant": "juxta"}, {"id": "n5", "kind": "literal", "type": "Scalar", "token": "15", "label": "Literal 15"}, {"id": "n6", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n3", "port": "left", "target": "n1", "role": "left"}, {"id": "e1", "source": "n3", "port": "right", "target": "n2", "role": "right"}, {"id": "e2", "source": "n4", "port": "left", "target": "n0", "role": "left"}, {"id": "e3", "source": "n4", "port": "right", "target": "n3", "role": "right"}, {"id": "e4", "source": "n6", "port": "left", "target": "n4", "role": "left"}, {"id": "e5", "source": "n6", "port": "right", "target": "n5", "role": "right"}]},
+      "types": {"n0": "Scalar", "n1": "Variable", "n2": "Scalar", "n3": "Scalar", "n4": "Scalar", "n5": "Scalar", "n6": "Relation"},
+      "value": null,
+      "latex": "3\\,\\left(x + 2\\right) = 15",
+      "error_count": 0
+    },
+    {
+      "name": "case_13",
+      "source": "y = 2x + 1",
+      "root": "n6",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "y", "label": "Variable y"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n2", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n3", "kind": "operator", "type": "Operator", "token": "\\,", "label": "Juxtaposition", "variant": "juxta"}, {"id": "n4", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1"}, {"id": "n5", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n6", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n3", "port": "left", "target": "n1", "role": "left"}, {"id": "e1", "source": "n3", "port": "right", "target": "n2", "role": "right"}, {"id": "e2", "source": "n5", "port": "left", "target": "n3", "role": "left"}, {"id": "e3", "source": "n5", "port": "right", "target": "n4", "role": "right"}, {"id": "e4", "source": "n6", "port": "left", "target": "n0", "role": "left"}, {"id": "e5", "source": "n6", "port": "right", "target": "n5", "role": "right"}]},
+      "types": {"n0": "Variable", "n1": "Scalar", "n2": "Variable", "n3": "Scalar", "n4": "Scalar", "n5": "Scalar", "n6": "Relation"},
+      "value": null,
+      "latex": "y = 2\\,x + 1",
+      "error_count": 0
+    },
+    {
+      "name": "case_14",
+      "source": "z = x^2 + y^2",
+      "root": "n8",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "z", "label": "Variable z"}, {"id": "n1", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n2", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n3", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n4", "kind": "variable", "type": "Variable", "token": "y", "label": "Variable y"}, {"id": "n5", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n6", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n7", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n8", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n3", "port": "base", "target": "n1", "role": "base"}, {"id": "e1", "source": "n3", "port": "exponent", "target": "n2", "role": "exponent"}, {"id": "e2", "source": "n6", "port": "base", "target": "n4", "role": "base"}, {"id": "e3", "source": "n6", "port": "exponent", "target": "n5", "role": "exponent"}, {"id": "e4", "source": "n7", "port": "left", "target": "n3", "role": "left"}, {"id": "e5", "source": "n7", "port": "right", "target": "n6", "role": "right"}, {"id": "e6", "source": "n8", "port": "left", "target": "n0", "role": "left"}, {"id": "e7", "source": "n8", "port": "right", "target": "n7", "role": "right"}]},
+      "types": {"n0": "Variable", "n1": "Variable", "n2": "Scalar", "n3": "Scalar", "n4": "Variable", "n5": "Scalar", "n6": "Scalar", "n7": "Scalar", "n8": "Relation"},
+      "value": null,
+      "latex": "z = {x}^{2} + {y}^{2}",
+      "error_count": 0
+    },
+    {
+      "name": "case_15",
+      "source": "\\ln(e^x) = x",
+      "root": "n4",
+      "graph": {"nodes": [{"id": "n0", "kind": "function", "type": "Function", "token": "\\ln", "label": "ln", "variant": "ln"}, {"id": "n1", "kind": "variable", "type": "Variable", "token": "e", "label": "Variable e"}, {"id": "n2", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n3", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n4", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n3", "port": "base", "target": "n1", "role": "base"}, {"id": "e1", "source": "n3", "port": "exponent", "target": "n2", "role": "exponent"}, {"id": "e2", "source": "n0", "port": "arg", "target": "n3", "role": "arg"}, {"id": "e3", "source": "n4", "port": "left", "target": "n0", "role": "left"}, {"id": "e4", "source": "n4", "port": "right", "target": "n2", "role": "right"}]},
+      "types": {"n0": "Expression", "n1": "Variable", "n2": "Variable", "n3": "Scalar", "n4": "Relation"},
+      "value": null,
+      "latex": "\\ln\\left({e}^{x}\\right) = x",
+      "error_count": 0
+    },
+    {
+      "name": "case_16",
+      "source": "e^{i\\pi} + 1 = 0",
+      "root": "n8",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "e", "label": "Variable e"}, {"id": "n1", "kind": "variable", "type": "Variable", "token": "i", "label": "Variable i"}, {"id": "n2", "kind": "literal", "type": "Scalar", "token": "\\pi", "label": "π"}, {"id": "n3", "kind": "operator", "type": "Operator", "token": "\\,", "label": "Juxtaposition", "variant": "juxta"}, {"id": "n4", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n5", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1"}, {"id": "n6", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n7", "kind": "literal", "type": "Scalar", "token": "0", "label": "Literal 0"}, {"id": "n8", "kind": "relation", "type": "Relation", "token": "=", "label": "Equality", "variant": "equal"}], "edges": [{"id": "e0", "source": "n3", "port": "left", "target": "n1", "role": "left"}, {"id": "e1", "source": "n3", "port": "right", "target": "n2", "role": "right"}, {"id": "e2", "source": "n4", "port": "base", "target": "n0", "role": "base"}, {"id": "e3", "source": "n4", "port": "exponent", "target": "n3", "role": "exponent"}, {"id": "e4", "source": "n6", "port": "left", "target": "n4", "role": "left"}, {"id": "e5", "source": "n6", "port": "right", "target": "n5", "role": "right"}, {"id": "e6", "source": "n8", "port": "left", "target": "n6", "role": "left"}, {"id": "e7", "source": "n8", "port": "right", "target": "n7", "role": "right"}]},
+      "types": {"n0": "Variable", "n1": "Variable", "n2": "Scalar", "n3": "Scalar", "n4": "Scalar", "n5": "Scalar", "n6": "Scalar", "n7": "Scalar", "n8": "Relation"},
+      "value": null,
+      "latex": "{e}^{\\left(i\\,\\pi\\right)} + 1 = 0",
+      "error_count": 0
+    },
+    {
+      "name": "case_17",
+      "source": "\\sqrt[3]{27}",
+      "root": "n2",
+      "graph": {"nodes": [{"id": "n0", "kind": "literal", "type": "Scalar", "token": "3", "label": "Literal 3"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "27", "label": "Literal 27"}, {"id": "n2", "kind": "container", "type": "Expression", "token": "\\sqrt[\\phantom{n}]{\\phantom{x}}", "label": "nth root", "variant": "root"}], "edges": [{"id": "e0", "source": "n2", "port": "upper", "target": "n0", "role": "upper"}, {"id": "e1", "source": "n2", "port": "body", "target": "n1", "role": "body"}]},
+      "types": {"n0": "Scalar", "n1": "Scalar", "n2": "Expression"},
+      "value": 3.0,
+      "latex": "\\sqrt[3]{27}",
+      "error_count": 0
+    },
+    {
+      "name": "case_18",
+      "source": "5!",
+      "root": "n1",
+      "graph": {"nodes": [{"id": "n0", "kind": "literal", "type": "Scalar", "token": "5", "label": "Literal 5"}, {"id": "n1", "kind": "operator", "type": "Operator", "token": "!", "label": "Factorial", "variant": "fact"}], "edges": [{"id": "e0", "source": "n1", "port": "arg", "target": "n0", "role": "arg"}]},
+      "types": {"n0": "Scalar", "n1": "Expression"},
+      "value": 120.0,
+      "latex": "5!",
+      "error_count": 0
+    },
+    {
+      "name": "case_19",
+      "source": "\\binom{6}{2}",
+      "root": "n0",
+      "graph": {"nodes": [{"id": "n0", "kind": "operator", "type": "Operator", "token": "\\binom{\\phantom{n}}{\\phantom{k}}", "label": "Binomial coefficient", "variant": "binom"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "6", "label": "Literal 6"}, {"id": "n2", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}], "edges": [{"id": "e0", "source": "n0", "port": "numerator", "target": "n1", "role": "numerator"}, {"id": "e1", "source": "n0", "port": "denominator", "target": "n2", "role": "denominator"}]},
+      "types": {"n0": "Expression", "n1": "Scalar", "n2": "Scalar"},
+      "value": 15.0,
+      "latex": "\\binom{6}{2}",
+      "error_count": 0
+    },
+    {
+      "name": "case_20",
+      "source": "\\sin(\\pi)",
+      "root": "n0",
+      "graph": {"nodes": [{"id": "n0", "kind": "function", "type": "Function", "token": "\\sin", "label": "sin", "variant": "sin"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "\\pi", "label": "π"}], "edges": [{"id": "e0", "source": "n0", "port": "arg", "target": "n1", "role": "arg"}]},
+      "types": {"n0": "Expression", "n1": "Scalar"},
+      "value": 1.2246467991473532E-16,
+      "latex": "\\sin\\left(\\pi\\right)",
+      "error_count": 0
+    },
+    {
+      "name": "case_21",
+      "source": "\\mathbb{R}",
+      "root": "n0",
+      "graph": {"nodes": [{"id": "n0", "kind": "set", "type": "Set", "token": "\\mathbb{R}", "label": "Set R"}], "edges": []},
+      "types": {"n0": "Set"},
+      "value": null,
+      "latex": "\\mathbb{R}",
+      "error_count": 0
+    },
+    {
+      "name": "case_22",
+      "source": "x + 0",
+      "root": "n2",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "0", "label": "Literal 0"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}], "edges": [{"id": "e0", "source": "n2", "port": "left", "target": "n0", "role": "left"}, {"id": "e1", "source": "n2", "port": "right", "target": "n1", "role": "right"}]},
+      "types": {"n0": "Variable", "n1": "Scalar", "n2": "Scalar"},
+      "value": null,
+      "latex": "x + 0",
+      "error_count": 0
+    },
+    {
+      "name": "case_23",
+      "source": "\\frac{-b + \\sqrt{b^2 - 4ac}}{2a}",
+      "root": "n14",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "b", "label": "Variable b"}, {"id": "n1", "kind": "operator", "type": "Operator", "token": "\\neg", "label": "Negation", "variant": "neg"}, {"id": "n2", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n3", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n4", "kind": "literal", "type": "Scalar", "token": "4", "label": "Literal 4"}, {"id": "n5", "kind": "variable", "type": "Variable", "token": "a", "label": "Variable a"}, {"id": "n6", "kind": "operator", "type": "Operator", "token": "\\,", "label": "Juxtaposition", "variant": "juxta"}, {"id": "n7", "kind": "variable", "type": "Variable", "token": "c", "label": "Variable c"}, {"id": "n8", "kind": "operator", "type": "Operator", "token": "\\,", "label": "Juxtaposition", "variant": "juxta"}, {"id": "n9", "kind": "operator", "type": "Operator", "token": "-", "label": "Subtraction", "variant": "sub"}, {"id": "n10", "kind": "container", "type": "Expression", "token": "\\sqrt{\\phantom{x}}", "label": "Square root", "variant": "sqrt"}, {"id": "n11", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n12", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n13", "kind": "operator", "type": "Operator", "token": "\\,", "label": "Juxtaposition", "variant": "juxta"}, {"id": "n14", "kind": "operator", "type": "Operator", "token": "\\frac", "label": "Fraction", "variant": "frac"}], "edges": [{"id": "e0", "source": "n1", "port": "arg", "target": "n0", "role": "arg"}, {"id": "e1", "source": "n3", "port": "base", "target": "n0", "role": "base"}, {"id": "e2", "source": "n3", "port": "exponent", "target": "n2", "role": "exponent"}, {"id": "e3", "source": "n6", "port": "left", "target": "n4", "role": "left"}, {"id": "e4", "source": "n6", "port": "right", "target": "n5", "role": "right"}, {"id": "e5", "source": "n8", "port": "left", "target": "n6", "role": "left"}, {"id": "e6", "source": "n8", "port": "right", "target": "n7", "role": "right"}, {"id": "e7", "source": "n9", "port": "left", "target": "n3", "role": "left"}, {"id": "e8", "source": "n9", "port": "right", "target": "n8", "role": "right"}, {"id": "e9", "source": "n10", "port": "body", "target": "n9", "role": "body"}, {"id": "e10", "source": "n11", "port": "left", "target": "n1", "role": "left"}, {"id": "e11", "source": "n11", "port": "right", "target": "n10", "role": "right"}, {"id": "e12", "source": "n13", "port": "left", "target": "n12", "role": "left"}, {"id": "e13", "source": "n13", "port": "right", "target": "n5", "role": "right"}, {"id": "e14", "source": "n14", "port": "numerator", "target": "n11", "role": "numerator"}, {"id": "e15", "source": "n14", "port": "denominator", "target": "n13", "role": "denominator"}]},
+      "types": {"n0": "Variable", "n1": "Expression", "n2": "Scalar", "n3": "Scalar", "n4": "Scalar", "n5": "Variable", "n6": "Scalar", "n7": "Variable", "n8": "Scalar", "n9": "Scalar", "n10": "Expression", "n11": "Expression", "n12": "Scalar", "n13": "Scalar", "n14": "Expression"},
+      "value": null,
+      "latex": "\\frac{\\neg b + \\sqrt{{b}^{2} - 4\\,a\\,c}}{2\\,a}",
+      "error_count": 0
+    },
+    {
+      "name": "case_24",
+      "source": "x^{2n+1}",
+      "root": "n6",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n2", "kind": "variable", "type": "Variable", "token": "n", "label": "Variable n"}, {"id": "n3", "kind": "operator", "type": "Operator", "token": "\\,", "label": "Juxtaposition", "variant": "juxta"}, {"id": "n4", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1"}, {"id": "n5", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n6", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}], "edges": [{"id": "e0", "source": "n3", "port": "left", "target": "n1", "role": "left"}, {"id": "e1", "source": "n3", "port": "right", "target": "n2", "role": "right"}, {"id": "e2", "source": "n5", "port": "left", "target": "n3", "role": "left"}, {"id": "e3", "source": "n5", "port": "right", "target": "n4", "role": "right"}, {"id": "e4", "source": "n6", "port": "base", "target": "n0", "role": "base"}, {"id": "e5", "source": "n6", "port": "exponent", "target": "n5", "role": "exponent"}]},
+      "types": {"n0": "Variable", "n1": "Scalar", "n2": "Variable", "n3": "Scalar", "n4": "Scalar", "n5": "Scalar", "n6": "Scalar"},
+      "value": null,
+      "latex": "{x}^{\\left(2\\,n + 1\\right)}",
+      "error_count": 0
+    },
+    {
+      "name": "case_25",
+      "source": "x^2 + 2x + 1",
+      "root": "n7",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}, {"id": "n3", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n4", "kind": "operator", "type": "Operator", "token": "\\,", "label": "Juxtaposition", "variant": "juxta"}, {"id": "n5", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}, {"id": "n6", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1"}, {"id": "n7", "kind": "operator", "type": "Operator", "token": "+", "label": "Addition", "variant": "add"}], "edges": [{"id": "e0", "source": "n2", "port": "base", "target": "n0", "role": "base"}, {"id": "e1", "source": "n2", "port": "exponent", "target": "n1", "role": "exponent"}, {"id": "e2", "source": "n4", "port": "left", "target": "n3", "role": "left"}, {"id": "e3", "source": "n4", "port": "right", "target": "n0", "role": "right"}, {"id": "e4", "source": "n5", "port": "left", "target": "n2", "role": "left"}, {"id": "e5", "source": "n5", "port": "right", "target": "n4", "role": "right"}, {"id": "e6", "source": "n7", "port": "left", "target": "n5", "role": "left"}, {"id": "e7", "source": "n7", "port": "right", "target": "n6", "role": "right"}]},
+      "types": {"n0": "Variable", "n1": "Scalar", "n2": "Scalar", "n3": "Scalar", "n4": "Scalar", "n5": "Scalar", "n6": "Scalar", "n7": "Scalar"},
+      "value": null,
+      "latex": "{x}^{2} + 2\\,x + 1",
+      "error_count": 0
+    },
+    {
+      "name": "case_26",
+      "source": "|x - 3|",
+      "root": "n3",
+      "graph": {"nodes": [{"id": "n0", "kind": "variable", "type": "Variable", "token": "x", "label": "Variable x"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "3", "label": "Literal 3"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "-", "label": "Subtraction", "variant": "sub"}, {"id": "n3", "kind": "container", "type": "Expression", "token": "\\left|\\cdot\\right|", "label": "Absolute value", "variant": "abs"}], "edges": [{"id": "e0", "source": "n2", "port": "left", "target": "n0", "role": "left"}, {"id": "e1", "source": "n2", "port": "right", "target": "n1", "role": "right"}, {"id": "e2", "source": "n3", "port": "body", "target": "n2", "role": "body"}]},
+      "types": {"n0": "Variable", "n1": "Scalar", "n2": "Scalar", "n3": "Scalar"},
+      "value": null,
+      "latex": "\\left|x - 3\\right|",
+      "error_count": 0
+    },
+    {
+      "name": "case_27",
+      "source": "2^10",
+      "root": "n2",
+      "graph": {"nodes": [{"id": "n0", "kind": "literal", "type": "Scalar", "token": "2", "label": "Literal 2"}, {"id": "n1", "kind": "literal", "type": "Scalar", "token": "10", "label": "Literal 10"}, {"id": "n2", "kind": "operator", "type": "Operator", "token": "^", "label": "Power", "variant": "power"}], "edges": [{"id": "e0", "source": "n2", "port": "base", "target": "n0", "role": "base"}, {"id": "e1", "source": "n2", "port": "exponent", "target": "n1", "role": "exponent"}]},
+      "types": {"n0": "Scalar", "n1": "Scalar", "n2": "Scalar"},
+      "value": 1024.0,
+      "latex": "{2}^{10}",
+      "error_count": 0
+    },
+    {
+      "name": "case_28",
+      "source": "|-3|",
+      "root": "n2",
+      "graph": {"nodes": [{"id": "n0", "kind": "literal", "type": "Scalar", "token": "3", "label": "Literal 3"}, {"id": "n1", "kind": "operator", "type": "Operator", "token": "\\neg", "label": "Negation", "variant": "neg"}, {"id": "n2", "kind": "container", "type": "Expression", "token": "\\left|\\cdot\\right|", "label": "Absolute value", "variant": "abs"}], "edges": [{"id": "e0", "source": "n1", "port": "arg", "target": "n0", "role": "arg"}, {"id": "e1", "source": "n2", "port": "body", "target": "n1", "role": "body"}]},
+      "types": {"n0": "Scalar", "n1": "Expression", "n2": "Expression"},
+      "value": 3.0,
+      "latex": "\\left|\\neg 3\\right|",
+      "error_count": 0
+    },
+    {
+      "name": "case_29",
+      "source": "1 \\in \\mathbb{R}",
+      "root": "n2",
+      "graph": {"nodes": [{"id": "n0", "kind": "literal", "type": "Scalar", "token": "1", "label": "Literal 1"}, {"id": "n1", "kind": "set", "type": "Set", "token": "\\mathbb{R}", "label": "Set R"}, {"id": "n2", "kind": "relation", "type": "Relation", "token": "\\in", "label": "Membership", "variant": "in"}], "edges": [{"id": "e0", "source": "n2", "port": "left", "target": "n0", "role": "left"}, {"id": "e1", "source": "n2", "port": "right", "target": "n1", "role": "right"}]},
+      "types": {"n0": "Scalar", "n1": "Set", "n2": "Relation"},
+      "value": null,
+      "latex": "1 \\in \\mathbb{R}",
+      "error_count": 0
+    }
+  ]
+}

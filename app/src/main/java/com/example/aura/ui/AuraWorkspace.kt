@@ -227,7 +227,8 @@ class AuraViewModel(private val repository: AuraRepository) : ViewModel() {
                     )
                 }
                 if (!quiet) notify(summary)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
+                // The kernel is pure Kotlin: a rejected mutation must never take the app down.
                 _state.update { it.copy(busy = false) }
                 notify(e.message ?: "Mutation rejected by hypergraph kernel", isError = true)
             }
@@ -448,7 +449,7 @@ class AuraViewModel(private val repository: AuraRepository) : ViewModel() {
                         "${result.proposals.size} candidates explored — none verified at this scale"
                     }
                 )
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 _state.update { it.copy(discovering = false) }
                 notify(e.message ?: "Discovery failed", isError = true)
             }

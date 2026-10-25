@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/artistso/aura-cal/docs/aura-graph.schema.json",
+  "title": "Aura Graph Format (AGF) 0.1",
+  "description": "A mathematical document as a typed, port-bound hypergraph. See docs/SPEC.md.",
+  "type": "object",
+  "required": ["nodes", "edges"],
+  "additionalProperties": true,
+  "properties": {
+    "agf": {
+      "type": "string",
+      "description": "Format version. Absent means 0.1.",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/vertex" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" }
+    }
+  },
+  "$defs": {
+    "vertex": {
+      "type": "object",
+      "required": ["id", "kind", "token", "label"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": {
+          "enum": ["literal", "variable", "operator", "relation", "function", "container", "set", "group"]
+        },
+        "type": {
+          "enum": ["Scalar", "Variable", "Vector", "Matrix", "Set", "Expression", "Relation", "Function", "Operator", "Unknown"]
+        },
+        "token": { "type": "string" },
+        "label": { "type": "string" },
+        "variant": { "type": ["string", "null"] },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "collapsed": { "type": "boolean" },
+        "collapsedLatex": { "type": ["string", "null"] },
+        "collapsedPayload": { "$ref": "#" }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["id", "source", "port", "target"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 },
+        "port": {
+          "enum": ["left", "right", "base", "exponent", "subscript", "numerator", "denominator", "lower", "upper", "body", "arg"]
+        },
+        "role": { "type": "string" }
+      }
+    }
+  }
+}

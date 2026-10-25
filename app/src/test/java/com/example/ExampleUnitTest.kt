@@ -13,6 +13,6 @@ class ExampleUnitTest {
             .filter { !it.ok }
             .joinToString("\n") { "[${it.suite}] ${it.name}: ${it.error}" }
         assertEquals("Kernel spec failures:\n$failureDetails", 0, report.failed)
-        assertTrue("Expected at least 40 kernel specs, got ${report.total}", report.total >= 40)
+        assertTrue("Expected at least 60 kernel specs, got ${report.total}", report.total >= 60)
     }
 }

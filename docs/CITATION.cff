@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+title: "Aura: a connection-first mathematical canvas over a typed hypergraph"
+message: "If you reference Aura or the Aura Graph Format (AGF), please cite this software metadata."
+type: software
+version: 2.1.0
+date-released: "2026-10-25"
+license: Apache-2.0
+keywords:
+  - mathematical interfaces
+  - typed hypergraph
+  - direct manipulation
+  - mathematical notation
+  - data format
+  - handwriting recognition
+  - computer algebra interop
+  - educational technology
+abstract: >-
+  Aura represents a mathematical document as a typed hypergraph in which vertices are
+  mathematical objects with typed ports and edges are port bindings. The system computes
+  structure-preserving ("homeomorphic") connection candidates during direct manipulation,
+  produces canvas-wide discovery proposals verified by deterministic numeric sampling, and
+  serialises the document to LaTeX, MathML and JSON. Aura Graph Format (AGF, draft 0.1)
+  specifies the document model so that other tools can produce and consume it. The kernel
+  ships with an executable specification suite covering type propagation, serialisation
+  precedence, parsing, evaluation, symbolic rewriting soundness, discovery verification and
+  input robustness.
+authors:
+  - name: "artistso"
+    alias: "artistso"
+repository-code: "https://github.com/artistso/aura-cal"
+url: "https://github.com/artistso/aura-cal"
+identifiers:
+  - type: other
+    value: "AGF-0.1"
+notes: >-
+  The Aura web prototype is a separate artefact; this record covers the Android client and the
+  AGF specification in this repository.

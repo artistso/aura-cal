@@ -7,9 +7,13 @@ import kotlin.math.abs
 
 /**
  * Aura kernel verification suite.
- * 44 executable specifications covering Ontology, Types, Serialisation, Parser,
+ *
+ * 60 executable specifications covering Ontology, Types, Serialisation, Parser,
  * Evaluator (2D & 3D), Symbolic & Solver, Graph invariants, Scope, Discovery & Proofs,
- * Ink Classifier, Library, and Interop.
+ * Ink Classifier, Library, Robustness and Interop.
+ *
+ * The suite runs in-app (Verify tab) and on the JVM through `./gradlew test`, so a regression
+ * in the expression kernel fails the build rather than reaching a tester.
  */
 
 data class SpecTestCase(
@@ -205,9 +209,13 @@ object KernelTests {
             checkEq(Engine.toLatex(d3.graph(), root.id), "\\sqrt[3]{y}", "nth root latex")
         },
         SpecTestCase("Serialisation", "every library token survives a parse → render round trip") {
+            // Bare delimiters are palette glyphs, not expressions: `|` opens an enclosure and
+            // has no meaning on its own, so the parser must reject it instead of inventing a leaf.
+            val delimiters = setOf("|", "\\|")
             val failures = ArrayList<String>()
             for (entry in SymbolLibrary.SYMBOL_LIBRARY) {
                 if (entry.kind !in listOf(NodeKind.Literal, NodeKind.Variable, NodeKind.Set)) continue
+                if (entry.token in delimiters) continue
                 try {
                     val parsed = LatexParser.parseLatex(entry.token)
                     if (parsed.nodeCount == 0) failures.add(entry.token)
@@ -216,6 +224,17 @@ object KernelTests {
                 }
             }
             checkCond(failures.isEmpty(), "unparsable leaf tokens: ${failures.take(6).joinToString(", ")}")
+        },
+        SpecTestCase("Serialisation", "bare delimiters are rejected rather than turned into vertices") {
+            for (delimiter in listOf("|", "\\|")) {
+                var threw = false
+                try {
+                    LatexParser.parseLatex(delimiter)
+                } catch (_: ParseError) {
+                    threw = true
+                }
+                checkCond(threw, "\"$delimiter\" must raise a ParseError")
+            }
         },
 
         // Parser (3)
@@ -242,6 +261,108 @@ object KernelTests {
                 threw = true
             }
             checkCond(threw, "unbalanced braces must raise a ParseError")
+        },
+
+        SpecTestCase("Parser", "unbraced exponent binds a single atom, not the rest of the equation") {
+            val parsed = LatexParser.parseLatex("a^2 + b^2 = c^2")
+            val index = Engine.indexGraph(parsed.graph)
+            val root = index.byId[parsed.rootId!!]
+            checkEq(root?.kind, NodeKind.Relation, "root must be the equality")
+            val left = Engine.childOf(index, root!!.id, PortId.Left)!!
+            checkEq(left.variant, "add", "left side must be a sum")
+            val leftPower = Engine.childOf(index, left.id, PortId.Left)!!
+            checkEq(leftPower.variant, "power", "first term must be a power")
+            checkEq(Engine.childOf(index, leftPower.id, PortId.Exponent)?.token, "2", "a^2 keeps exponent 2")
+            val right = Engine.childOf(index, root.id, PortId.Right)!!
+            checkEq(right.variant, "power", "right side must be c^2")
+            checkEq(Engine.childOf(index, right.id, PortId.Exponent)?.token, "2", "c^2 keeps exponent 2")
+            checkEq(Engine.diagnose(parsed.graph).size, 0, "the Pythagorean theorem must be well-typed")
+        },
+        SpecTestCase("Parser", "braced exponent keeps a full expression") {
+            val parsed = LatexParser.parseLatex("x^{2n+1}")
+            val index = Engine.indexGraph(parsed.graph)
+            val root = index.byId[parsed.rootId!!]!!
+            checkEq(root.variant, "power", "x^(2n+1) is a power")
+            val exp = Engine.childOf(index, root.id, PortId.Exponent)!!
+            checkEq(exp.variant, "add", "the braced exponent is the sum 2n + 1")
+        },
+        SpecTestCase("Parser", "power of a power is read left to right without dropping tokens") {
+            val parsed = LatexParser.parseLatex("x^2^3")
+            val index = Engine.indexGraph(parsed.graph)
+            val root = index.byId[parsed.rootId!!]!!
+            checkEq(root.variant, "power", "outer power")
+            val base = Engine.childOf(index, root.id, PortId.Base)!!
+            checkEq(base.variant, "power", "inner power (x^2)^3")
+            checkEq(Engine.childOf(index, root.id, PortId.Exponent)?.token, "3", "outer exponent survives")
+        },
+        SpecTestCase("Parser", "x^2 = 9 parses as an equality of a power and a literal") {
+            val parsed = LatexParser.parseLatex("x^2 = 9")
+            val index = Engine.indexGraph(parsed.graph)
+            val root = index.byId[parsed.rootId!!]!!
+            checkEq(root.kind, NodeKind.Relation, "root is the equality")
+            checkCond(root.variant == "equal", "variant is equal")
+            checkEq(Engine.childOf(index, root.id, PortId.Left)?.variant, "power", "left side is x²")
+            checkEq(Engine.diagnose(parsed.graph).size, 0, "no diagnostics for x² = 9")
+        },
+        SpecTestCase("Parser", "reads integral limits and strips the differential") {
+            val parsed = LatexParser.parseLatex("\\int_0^1 x^2 \\, dx")
+            val index = Engine.indexGraph(parsed.graph)
+            val root = index.byId[parsed.rootId!!]!!
+            checkEq(root.variant, "int", "root is an integral")
+            checkEq(Engine.childOf(index, root.id, PortId.Lower)?.token, "0", "lower limit")
+            checkEq(Engine.childOf(index, root.id, PortId.Upper)?.token, "1", "upper limit")
+            val body = Engine.childOf(index, root.id, PortId.Body)!!
+            checkEq(body.variant, "power", "integrand is x², not x²·d·x")
+            checkCond(parsed.graph.nodes.none { it.token == "d" }, "the differential must not become a vertex")
+            checkEq(Engine.diagnose(parsed.graph).size, 0, "integral must be complete")
+        },
+        SpecTestCase("Parser", "summation index relations are admissible limits") {
+            val parsed = LatexParser.parseLatex("\\sum_{n=1}^{10} n")
+            val index = Engine.indexGraph(parsed.graph)
+            val root = index.byId[parsed.rootId!!]!!
+            val lower = Engine.childOf(index, root.id, PortId.Lower)!!
+            checkEq(lower.kind, NodeKind.Relation, "lower limit is the index relation n = 1")
+            val errors = Engine.diagnose(parsed.graph).filter { it.severity == DiagnosticSeverity.Error }
+            checkEq(errors.size, 0, "index bounds are legal, received ${errors.map { it.message }}")
+            checkEq(Evaluate.evalExpression(index, root.id), 55.0, "sum 1..10")
+        },
+        SpecTestCase("Parser", "absolute value parses to an enclosure that evaluates") {
+            val parsed = LatexParser.parseLatex("|x - 3| = 4")
+            val index = Engine.indexGraph(parsed.graph)
+            val root = index.byId[parsed.rootId!!]!!
+            checkEq(root.kind, NodeKind.Relation, "root is the equality")
+            val left = Engine.childOf(index, root.id, PortId.Left)!!
+            checkEq(left.variant, "abs", "left side is an absolute value")
+            checkEq(left.kind, NodeKind.Container, "enclosure is a container vertex")
+            val value = LatexParser.parseLatex("|-3|")
+            checkEq(Evaluate.evalExpression(Engine.indexGraph(value.graph), value.rootId!!), 3.0, "|-3| = 3")
+        },
+        SpecTestCase("Parser", "rejects an unclosed absolute value") {
+            var threw = false
+            try {
+                LatexParser.parseLatex("|x + 1")
+            } catch (_: ParseError) {
+                threw = true
+            }
+            checkCond(threw, "an unmatched bar must raise a ParseError")
+        },
+        SpecTestCase("Parser", "rejects trailing tokens instead of silently dropping them") {
+            var threw = false
+            try {
+                LatexParser.parseLatex("x = 1 )")
+            } catch (_: ParseError) {
+                threw = true
+            }
+            checkCond(threw, "leftover input must raise a ParseError")
+        },
+        SpecTestCase("Types", "absolute value of a variable infers a scalar type") {
+            val parsed = LatexParser.parseLatex("|x|")
+            val index = Engine.indexGraph(parsed.graph)
+            checkEq(
+                Engine.effectiveType(index, parsed.rootId!!),
+                MathType.Scalar,
+                "|x| is scalar-valued"
+            )
         },
 
         // Evaluator (6 - including new 3D surface evaluation)
@@ -318,6 +439,52 @@ object KernelTests {
             val steps = SymbolicEngine.solveForVariable(parsed.graph, parsed.rootId!!, "x")
             checkCond(steps.size >= 2, "expected multi-step isolation for x")
             checkCond(steps.last().afterLatex.startsWith("x ="), "x isolated on LHS")
+        },
+
+        SpecTestCase("Symbolic", "linear solve ends in an evaluated solution") {
+            val parsed = LatexParser.parseLatex("2x + 3 = 11")
+            val steps = SymbolicEngine.solveForVariable(parsed.graph, parsed.rootId!!, "x")
+            checkCond(steps.size >= 2, "expected at least two steps, received ${steps.size}")
+            checkEq(steps.last().afterLatex, "x = 4", "solution must be evaluated")
+        },
+        SpecTestCase("Symbolic", "quadratic solve keeps both real roots") {
+            val parsed = LatexParser.parseLatex("x^2 = 9")
+            val steps = SymbolicEngine.solveForVariable(parsed.graph, parsed.rootId!!, "x")
+            checkCond(steps.isNotEmpty(), "expected a root-extraction step")
+            checkEq(steps.first().ruleName, "Even Root Extraction", "even powers have two roots")
+            checkCond(steps.first().afterLatex.contains("\\pm"), "first step carries ±, received ${steps.first().afterLatex}")
+            checkEq(steps.last().afterLatex, "x = \\pm 3", "both roots evaluated")
+        },
+        SpecTestCase("Symbolic", "odd roots stay single-valued") {
+            val parsed = LatexParser.parseLatex("x^3 = 27")
+            val steps = SymbolicEngine.solveForVariable(parsed.graph, parsed.rootId!!, "x")
+            checkCond(steps.isNotEmpty(), "expected a root-extraction step")
+            checkEq(steps.last().afterLatex, "x = 3", "cube root is unique")
+            checkCond(steps.none { it.afterLatex.contains("\\pm") }, "odd roots must not gain a ± branch")
+        },
+        SpecTestCase("Symbolic", "every solve step preserves the truth of the equation") {
+            val parsed = LatexParser.parseLatex("2x + 3 = 11")
+            val steps = SymbolicEngine.solveForVariable(parsed.graph, parsed.rootId!!, "x")
+            checkCond(steps.isNotEmpty(), "expected solve steps")
+            fun holds(graph: AuraGraph, x: Double): Boolean? {
+                val index = Engine.indexGraph(graph)
+                val root = Engine.rootsOf(graph).firstOrNull { it.kind == NodeKind.Relation } ?: return null
+                val left = Engine.childOf(index, root.id, PortId.Left) ?: return null
+                val right = Engine.childOf(index, root.id, PortId.Right) ?: return null
+                val env = mapOf("x" to x)
+                val l = Evaluate.evalExpression(index, left.id, env) ?: return null
+                val r = Evaluate.evalExpression(index, right.id, env) ?: return null
+                return abs(l - r) < 1e-9
+            }
+            for (step in steps) {
+                for (sample in listOf(-2.0, 0.0, 1.0, 4.0, 7.0)) {
+                    val before = holds(step.graph, sample)
+                    // Re-parse the rendered form: a step that does not survive serialisation is not a step.
+                    val afterGraph = LatexParser.parseLatex(step.afterLatex).graph
+                    val after = holds(afterGraph, sample)
+                    checkEq(after, before, "step \"${step.ruleName}\" changed the truth value at x = $sample")
+                }
+            }
         },
 
         // Graph (7)
@@ -493,6 +660,34 @@ object KernelTests {
             for (req in listOf("Algebra", "Trigonometry", "Calculus", "Linear algebra", "Set theory", "Logic")) {
                 checkCond(req in domains, "missing domain $req")
             }
+        },
+
+        // Robustness (3)
+        SpecTestCase("Robustness", "deeply nested grouping is rejected instead of overflowing the stack") {
+            var rejected = false
+            try {
+                LatexParser.parseLatex("(".repeat(500) + "x" + ")".repeat(500))
+            } catch (_: ParseError) {
+                rejected = true
+            }
+            checkCond(rejected, "500 levels of nesting must raise a ParseError")
+        },
+        SpecTestCase("Robustness", "oversized input is rejected before it can exhaust memory") {
+            var rejected = false
+            try {
+                LatexParser.parseLatex((1..5000).joinToString("+") { "x" })
+            } catch (_: ParseError) {
+                rejected = true
+            }
+            checkCond(rejected, "a 5000-term chain must raise a ParseError")
+        },
+        SpecTestCase("Robustness", "nested enclosures serialise in linear time") {
+            val source = "|".repeat(80) + "x" + "|".repeat(80)
+            val started = System.currentTimeMillis()
+            val parsed = LatexParser.parseLatex(source)
+            val elapsed = System.currentTimeMillis() - started
+            checkCond(parsed.nodeCount >= 80, "expected one vertex per enclosure, received ${parsed.nodeCount}")
+            checkCond(elapsed < 2000, "serialisation took ${elapsed}ms — subtrees are being re-rendered")
         },
 
         // Interop (1)

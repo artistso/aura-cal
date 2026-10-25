@@ -16,3 +16,23 @@
 local.properties
 .env
 debug.keystore
+
+# Signing material must never be committed — this repository is public.
+*.jks
+*.keystore
+!debug.keystore
+keystore.properties
+
+# Local build output
+/app/build
+/build
+.cxx/
+
+# Python (agf package)
+__pycache__/
+*.py[cod]
+python/.venv/
+python/build/
+python/dist/
+*.egg-info/
+.pytest_cache/

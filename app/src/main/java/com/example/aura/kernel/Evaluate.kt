@@ -239,6 +239,14 @@ object Evaluate {
             NodeKind.Operator -> {
                 val v = node.variant
                 when {
+                    v != null && v in Ontology.ENCLOSURE_VARIANTS -> {
+                        val arg = child(PortId.Arg) ?: child(PortId.Body) ?: return null
+                        when (v) {
+                            "floor" -> floor(arg)
+                            "ceil" -> ceil(arg)
+                            else -> abs(arg)
+                        }
+                    }
                     v == "power" -> {
                         val base = child(PortId.Base)
                         val exp = child(PortId.Exponent)
@@ -273,6 +281,8 @@ object Evaluate {
                         }
                     }
                     v != null && v in Ontology.PREFIX_VARIANTS -> {
+                        // `\pm` denotes a set of values, not a value: it is undefined, not its operand.
+                        if (v == "pm" || v == "mp") return null
                         val arg = child(PortId.Arg) ?: return null
                         if (v == "neg") -arg else arg
                     }
@@ -515,12 +525,20 @@ object Evaluate {
         for (node in graph.nodes) {
             values[node.id] = evalExpression(index, node.id, emptyMap())
         }
+        fun isSignAmbiguous(id: String): Boolean {
+            val node = index.byId[id] ?: return false
+            if (node.variant == "pm" || node.variant == "mp") return true
+            return false
+        }
+
         val chosen = ArrayList<String>()
         for (node in graph.nodes) {
             if (node.kind in listOf(NodeKind.Literal, NodeKind.Relation, NodeKind.Set, NodeKind.Group)) continue
             val value = values[node.id] ?: continue
             val subtree = Engine.subtreeIds(index, node.id)
             if (subtree.size < 2) continue
+            // `\pm 3` denotes two values; folding it to 3 would silently drop a root.
+            if (subtree.any { isSignAmbiguous(it) }) continue
             var ancestor = index.parent[node.id]
             var shadowed = false
             while (ancestor != null) {
