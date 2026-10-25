@@ -1,4 +1,4 @@
-name: Android CI
+name: CI
 
 on:
   push:
@@ -10,9 +10,56 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Keep this equal to `kotlin` in gradle/libs.versions.toml.
+  KOTLIN_VERSION: '2.2.10'
+
 jobs:
-  verify:
-    name: Kernel specs + assemble
+  # The correctness gate. Pure Kotlin on a plain JVM: no Android SDK, no Gradle, no network once
+  # the compiler is downloaded. It ran as part of the Android job before, which meant a failure to
+  # install the SDK looked identical to a broken kernel -- and repeatedly was exactly that.
+  kernel:
+    name: Kernel specs (JVM only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Cache the Kotlin compiler
+        uses: actions/cache@v4
+        with:
+          path: ~/kotlin-compiler
+          key: kotlin-compiler-${{ env.KOTLIN_VERSION }}
+
+      - name: Install the Kotlin compiler
+        run: |
+          set -euo pipefail
+          if [ ! -x "$HOME/kotlin-compiler/kotlinc/bin/kotlinc" ]; then
+            curl -sSLo /tmp/kotlin.zip \
+              "https://github.com/JetBrains/kotlin/releases/download/v${KOTLIN_VERSION}/kotlin-compiler-${KOTLIN_VERSION}.zip"
+            rm -rf "$HOME/kotlin-compiler"
+            mkdir -p "$HOME/kotlin-compiler"
+            unzip -q /tmp/kotlin.zip -d "$HOME/kotlin-compiler"   # -> ~/kotlin-compiler/kotlinc
+          fi
+          "$HOME/kotlin-compiler/kotlinc/bin/kotlinc" -version
+
+      - name: Run the kernel specification suite
+        run: |
+          set -euo pipefail
+          KOTLINC="$HOME/kotlin-compiler/kotlinc/bin/kotlinc"
+          "$KOTLINC" app/src/main/java/com/example/aura/kernel/*.kt tools/RunKernelSpecs.kt \
+            -include-runtime -d build/kernel-specs.jar
+          java -cp build/kernel-specs.jar kernel.specs.KernelSpecs
+
+  android:
+    name: Assemble debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -25,29 +72,24 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # GitHub's ubuntu-latest image ships the Android SDK; it is only the *setup action* that
+      # kept failing to download cmdline-tools. Use what the image already has.
+      - name: Locate the preinstalled Android SDK
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "Android SDK at $SDK"
+          test -d "$SDK" || { echo "::error::no Android SDK on this image"; exit 1; }
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
 
-      # The repository does not vendor a Gradle wrapper jar, so the runner installs
-      # the same Gradle version declared in gradle/wrapper/gradle-wrapper.properties.
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
 
-      - name: Run the kernel specification suite
-        run: gradle --no-daemon testDebugUnitTest --stacktrace
-
       - name: Assemble debug APK
         run: gradle --no-daemon assembleDebug --stacktrace
-
-      - name: Upload unit-test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-reports
-          path: app/build/reports/tests/
-          if-no-files-found: ignore
 
   conformance:
     name: AGF conformance (Python)

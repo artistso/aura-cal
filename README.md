@@ -25,16 +25,27 @@ it produces is not trapped in this app:
   semantics and the conformance evidence, including what the evidence does *not* establish.
 
 AGF is a **draft**, and it now has two implementations that agree: the Kotlin kernel and an
-independent Python package ([`python/`](python/)), which passes all five conformance classes plus
-the LaTeX projection (172 checks). Treat it as a proposal, not yet a standard.
+independent Python package ([`python/`](python/)), which passes all six conformance classes plus
+the LaTeX projection (203 checks). Treat it as a proposal, not yet a standard.
+
+Nothing below needs an Android SDK. The kernel specs are plain Kotlin; this is how CI runs them.
 
 ```bash
-cd python && pip install -e ".[sympy,test]" && python -m pytest   # 55 tests
-python -m auragf.cli conformance                                  # 203/203
+# 1. Kernel specifications — 60 specs, a JDK and kotlinc, nothing else
+kotlinc app/src/main/java/com/example/aura/kernel/*.kt tools/RunKernelSpecs.kt \
+  -include-runtime -d build/kernel-specs.jar
+java -cp build/kernel-specs.jar kernel.specs.KernelSpecs
+
+# 2. The independent Python implementation — 55 tests
+pip install "aura-agf[test]"            # or: cd python && pip install -e ".[sympy,test]"
+python -m pytest python/tests
+
+# 3. Cross-implementation conformance — 203 checks
+python -m auragf.cli conformance docs/conformance
 ```
 
 ```python
-from agf import load, validate, evaluate
+from auragf import load, validate, evaluate
 doc = load("canvas.agf.json")
 print([str(d) for d in validate(doc)], evaluate(doc, doc.roots()[0].id))
 ```

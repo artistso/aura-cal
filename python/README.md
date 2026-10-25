@@ -93,3 +93,22 @@ print(sympy.solve(expr, sympy.Symbol("x")))  # [4]
 
 `±` is refused rather than guessed (it denotes a set of values), and unsupported constructs
 raise `UnsupportedConstruct` instead of silently producing something wrong.
+
+## Publishing (maintainers)
+
+The name `aura-agf` is unclaimed on PyPI; `agf` is not, and cannot be used. Do a dry run first so a
+mistake lands on TestPyPI rather than on the real index — a deleted release keeps its version
+number forever and cannot be re-uploaded.
+
+```bash
+cd python
+python -m build                                   # writes dist/aura_agf-0.1.0.{whl,tar.gz}
+python -m twine check dist/*                      # metadata renders (README, licence links)
+python -m twine upload --repository testpypi dist/*
+pip install --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple/ aura-agf   # verify
+python -m twine upload dist/*                     # for real
+```
+
+Then bump `version` in `pyproject.toml`, tag the commit `agf-0.1`, and attach the sdist to the
+GitHub release so the paper can cite an immutable artifact as well as the package.
