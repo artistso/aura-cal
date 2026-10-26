@@ -37,10 +37,11 @@ information that reorders everything else.
   `agf` package installed alongside. The distribution is `aura-agf` (import `auragf`) because
   `agf` is already on PyPI and installs its own top-level `agf` module — the original name would
   have shadowed it. Publication is wired up (`.github/workflows/publish-pypi.yml`, Trusted
-  Publishing — see `docs/publishing-pypi.md`): the package is authored by steven owens, builds
-  cleanly and awaits only the one-time PyPI account-side setup plus an `aura-agf-v0.1.0`
-  release. **Not yet uploaded, and written by the same author** — so the gate is 80%
-  closed, not closed, until it is live *and* reviewed by someone else.
+  Publishing — see `docs/publishing-pypi.md`): version 0.1.0 is published on
+  [PyPI](https://pypi.org/project/aura-agf/) from the `aura-agf-v0.1.0` release, and a clean
+  environment installation from PyPI has been verified. **It is still written and tested by the
+  same author** — publication closes the distribution half of this gate, not the independent-
+  review half. The gate remains open until someone else reviews the implementation.
 * **Pass:** published on PyPI, and reviewed by at least one person who did not write it.
 * **Kill signal:** the spec turns out to be under-specified for someone writing it fresh. That is
   the single most useful thing that can happen before the format hardens — it is why this gate

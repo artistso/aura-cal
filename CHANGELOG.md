@@ -15,8 +15,8 @@ All notable changes to the Android client. Format follows [Keep a Changelog](htt
   The one-time account-side setup is in `docs/publishing-pypi.md`. While preparing the first
   upload: `python/LICENSE` (a verbatim copy of `LICENSE`, drift-checked in the workflow) so
   the sdist/wheel actually carry the licence text, and the PyPI README's repository-relative
-  links became absolute so they work on pypi.org. **Not yet uploaded** — the first release
-  (`aura-agf-v0.1.0`) does that.
+  links became absolute so they work on pypi.org. Version 0.1.0 is published on PyPI from the
+  `aura-agf-v0.1.0` release.
 * **`python/` — an independent implementation of AGF 0.1.** Reader/writer (with unknown-member
   preservation), the full vocabulary and port table, type inference, well-formedness rules
   W1–W7 plus W8, the reference evaluator (`undefined` ≠ `NaN`), the LaTeX projection, a SymPy
