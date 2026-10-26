@@ -1,14 +1,15 @@
-# Publishing `aura-agf` to PyPI — the one-time setup
+# Publishing `aura-agf` to PyPI — setup and release runbook
 
-Everything that can be done in code is done: the package is authored by **steven owens**,
-builds cleanly, passes `twine check`, and `.github/workflows/publish-pypi.yml` tests,
-builds and publishes it using PyPI **Trusted Publishing** (OIDC). That last part is why
-this document exists: Trusted Publishing means PyPI trusts a specific GitHub workflow
-instead of a password-like API token — but telling PyPI to trust it has to be done by
-**you, logged in to your own PyPI account**. Nobody can (or should) do that step for you,
-and you should never paste a PyPI token or password into a chat, issue or commit.
+> **Current status:** version 0.1.0 was published on 2026-10-25 from GitHub release
+> [`aura-agf-v0.1.0`](https://github.com/artistso/aura-cal/releases/tag/aura-agf-v0.1.0).
+> A clean installation from PyPI was verified. The setup steps below are retained as the
+> reproducible account and release runbook; they do not need to be repeated for 0.1.0.
 
-Total time: about 10 minutes, once.
+The package is authored by **steven owens**, builds cleanly, passes `twine check`, and
+`.github/workflows/publish-pypi.yml` tests, builds and publishes it using PyPI **Trusted
+Publishing** (OIDC). Trusted Publishing means PyPI trusts a specific GitHub workflow instead
+of a password-like API token. Nobody should paste a PyPI token or password into a chat, issue
+or commit.
 
 > **Why not just upload now?** A PyPI version number is permanent: even if you delete a
 > release, `0.1.0` can never be uploaded again. So the order below is deliberate —

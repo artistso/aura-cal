@@ -29,6 +29,14 @@ AGF is a **draft**, and it now has two implementations that agree: the Kotlin ke
 independent Python package ([`python/`](python/)), which passes all six conformance classes plus
 the LaTeX projection (203 checks). Treat it as a proposal, not yet a standard.
 
+The independent Python implementation is published on PyPI as
+[`aura-agf`](https://pypi.org/project/aura-agf/):
+
+```bash
+pip install "aura-agf[sympy]"
+agf --help
+```
+
 Nothing below needs an Android SDK. The kernel specs are plain Kotlin; this is how CI runs them.
 
 ```bash
@@ -37,7 +45,7 @@ kotlinc app/src/main/java/com/example/aura/kernel/*.kt tools/RunKernelSpecs.kt \
   -include-runtime -d build/kernel-specs.jar
 java -cp build/kernel-specs.jar kernel.specs.KernelSpecs
 
-# 2. The independent Python implementation — 55 tests
+# 2. Contributor tests for the independent Python implementation — 55 tests
 cd python && pip install -e ".[sympy,test]" && cd ..
 python -m pytest python/tests
 
